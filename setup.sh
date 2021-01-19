@@ -88,16 +88,16 @@ cd /home/pi || error "cd failed ???"
 
 echo "Welcome to the PiAQI autoinstallation script!"
 
+echo "Pulling dependancies..."
+pulldeps || error "dependancy pull failed!"
+
+echo "dependancies pulled!"
+
 if [ "$(enablei2c)" -eq 1 ]; then
 	read -r -p "i2c has just been enabled. We now need to reboot (you will be disconnected). Press enter to continue, and then rerun this script with \"sudo ./setup.sh\" once you reconnect"
 	reboot
 fi
 
-echo "Pulling dependancies..."
-pulldeps || error "dependancy pull failed!"
-
-
-echo "dependancies pulled!"
 
 cat << "EOF"
 (not to scale, top left pin is pin #1)

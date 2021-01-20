@@ -119,7 +119,7 @@ Once you've given your pi 10 minutes to set up, we can access it from our comput
 
 For MacOS or linux, you will aready have ssh installed. For windows, you MAY have ssh installed; try the steps below, and if you get an "ssh is not recognized as an internal or external command" kind of thing, follow the instructions for "ssh (PuTTY)" below
 
-### MacOS, Linux, and possibly Windows
+### MacOS, Linux, and (Modern) Windows
 
 open your terminal and type in the following command and press enter
 

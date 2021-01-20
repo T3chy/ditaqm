@@ -17,7 +17,7 @@ pulldeps(){
 	# git, cuz duh
 	apt-get install -y git
 
-	cd diyaqi || git clone https://github.com/t3chy/diyaqi && cd diyaqi
+	cd diyaqi || git clone https://github.com/t3chy/diyaqi; cd diyaqi
 
 	# python, for obvious reasons
 	apt-get install -y python3 python3-pip || exit 1

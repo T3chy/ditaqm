@@ -7,7 +7,6 @@ fi
 error() { clear; printf "ERROR:\\n%s\\n" "$1" >&2; exit 1;}
 i2cDeviceExists() {
 	devs=$(i2cdetect -y 1 | sed 1d | sed 's/^....//' | sed 's/--//g')
-	# if [ -n "${devs// }" ]; then
 	case $devs in
 		(*[![:blank:]]*) return 0;;
 		(*) return 1
@@ -36,11 +35,16 @@ pulldeps(){
 	# i2ctools to detect device
 	apt-get install -y i2c-tools
 
-	# BME / boardio deps
+	# sensor / boardio deps
 
 	pip3 install RPI.GPIO || exit 1
 	pip3 install adafruit-blinka
 	pip3 install adafruit-circuitpython-bme280
+	pip3 install adafruit-circuitpython-ads1x15
+	pip3 install pigpio
+	apt-get install -y pigpio python-pigpio python3-pigpio
+	sudo systemctl enable pigpiod || error "failed to enable pigpiod!"
+	sudo systemctl start pigpiod || error "failed to start pipgpiod!"
 
 }
 enablei2c(){
@@ -53,12 +57,18 @@ enablei2c(){
 	else
 		echo 0
 	fi
-	}
-sensorTest(){
-	v="$(python sensorTest.py)"
-	if ! [ "$v" == '0' ]; then
-		exit 1
-	fi
+}
+enableSpi(){
+	true
+}
+bmeTest(){
+	python tests/bme280Test.py
+}
+cjmcuTest(){
+	python tests/cjmcuADS1115Test.py
+}
+mhz19b(){
+	python tests/mhz19Test.py
 }
 hostTest(){
 	resp=$(curl -o /dev/null -i -L -s -w "%{http_code}\n" "$host/test")
@@ -101,7 +111,7 @@ fi
 
 cat << "EOF"
 (not to scale, top left pin is pin #1)
-Wire your sensor according to the following key
+Wire your BME sensor according to the following key
 _______________________
 |Sensor     |Pi       |
 |---------------------|
@@ -128,19 +138,33 @@ _______________________
 
 EOF
 
-read -r -p "Please hook up your BME280 sensor according to the diagram above and press enter to continue"
+read -r -p "Please hook up the sensors you would like to use and press enter to continue"
 
-echo "attempting to detect i2c devicew.."
-
-if i2cDeviceExists; then
-	echo "Device found! Proceeding"
+echo "Looking for BME280 Sensor..."
+bme="$(bmeTest)"
+if [ "$bme" == 0 ]; then
+	echo "BME sensor found!"
 else
-	error "Device not found :( please check your wiring and rerun this script"
+	echo "no BME sensor found :("
 fi
 
-echo "testing the sensor..."
+echo "Looking for CHMCU-6814 Sensor..."
+cjmcu="$(cjmcuTest)"
+if [ "$cjmcu" == 0 ]; then
+	echo "CHMCU-6814 sensor found!"
+else
+	echo "CHMCU-6814 no sensor found :("
+fi
 
-sensorTest || error "sensor test failed!"
+
+echo "Looking for CHMCU-6814 Sensor..."
+mhz19b="$(mhz19bTest)"
+if [ "$mhz19b" == 0 ]; then
+	echo "mhz19b sensor found!"
+else
+	echo "no mhz19b sensor found :("
+fi
+
 
 flag=1
 while ! [ $flag -eq 0 ]; do
@@ -200,7 +224,7 @@ while ! [ $flag -eq 0 ]; do
 	fi
 done
 
-printf "%s\n%s\n" "$host" "$name" > config
+printf "%s\n%s\n%d\n%d\n%d\n" "$host" "$name" "$bme" "$cjmcu" "$mhz19b" > config
 
 echo "configuration stored!"
 

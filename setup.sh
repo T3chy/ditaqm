@@ -63,7 +63,7 @@ bmeTest(){
 cjmcuTest(){
 	python tests/cjmcuADS1115Test.py
 }
-mhz19b(){
+mhz19bTest(){
 	python tests/mhz19Test.py
 }
 hostTest(){
@@ -106,7 +106,6 @@ fi
 
 
 cat << "EOF"
-(not to scale, top left pin is pin #1)
 Wire your BME sensor according to the following key
 _______________________
 |Sensor     |Pi       |
@@ -117,6 +116,7 @@ _______________________
 |SCL        |C        |
 |---------------------|
 
+(not to scale, top left pin is pin #1)
 .____________.
 |h   sd   .V |
 |d        D. |

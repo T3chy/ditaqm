@@ -86,6 +86,7 @@ def update():
         pp = p.pulse_period()
         pw = p.pulse_width()
         res["CO2"] = (5000.0)*(pw-2.0)/(pp-4.0)
+    res["name"] = name
     return res
 
 if len(sys.argv) == 2:

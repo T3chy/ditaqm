@@ -58,9 +58,6 @@ enablei2c(){
 		echo 0
 	fi
 }
-enableSpi(){
-	true
-}
 bmeTest(){
 	python tests/bme280Test.py
 }
@@ -138,6 +135,7 @@ _______________________
 
 EOF
 
+echo "currently supported sensors; BME280 (i2c), CJMCU-6814 (i2c, through ADS1115), and MH-Z19 (pwm connected to physical pin 7)"
 read -r -p "Please hook up the sensors you would like to use and press enter to continue"
 
 echo "Looking for BME280 Sensor..."

@@ -11,8 +11,8 @@ import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import math
 import pigpio
-import read_PWM
 sys.path.append("tests/")
+import read_PWM
 
 # constants
 R00 = 48.

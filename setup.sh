@@ -17,7 +17,8 @@ pulldeps(){
 	# git, cuz duh
 	apt-get install -y git
 
-	cd diyaqi || git clone https://github.com/t3chy/diyaqi; cd diyaqi
+	[ -d diyaqi ] || git clone https://github.com/t3chy/diyaqi
+	cd diyaqi || error "can't enter source directory. Git clone probably failed"
 
 	# python, for obvious reasons
 	apt-get install -y python3 python3-pip || exit 1

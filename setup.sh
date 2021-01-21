@@ -4,14 +4,9 @@ if [ "$(id -u)" != "0" ]; then
 	echo "You must be the superuser to run this script :( try adding \"sudo\" at the begining of your command and rerun" >&2
 	exit 1
 fi
+
 error() { clear; printf "ERROR:\\n%s\\n" "$1" >&2; exit 1;}
-i2cDeviceExists() {
-	devs=$(i2cdetect -y 1 | sed 1d | sed 's/^....//' | sed 's/--//g')
-	case $devs in
-		(*[![:blank:]]*) return 0;;
-		(*) return 1
-	esac
-}
+
 pullDeps(){ #TODO try to not run this after reboot
 
 	apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
@@ -52,6 +47,15 @@ pullDeps(){ #TODO try to not run this after reboot
 	sudo systemctl start pigpiod || error "failed to start pipgpiod!"
 
 }
+
+# i2c stuff
+i2cDeviceExists() {
+	devs=$(i2cdetect -y 1 | sed 1d | sed 's/^....//' | sed 's/--//g')
+	case $devs in
+		(*[![:blank:]]*) return 0;;
+		(*) return 1
+	esac
+}
 enableI2c(){
 	if ! i2cdetect -y 1 > /dev/null; then
 		echo "i2c-bcm2708" >> /etc/modules
@@ -63,15 +67,13 @@ enableI2c(){
 		echo 0
 	fi
 }
-test_bme(){
-	python tests/test_bme280test.py
-}
-test_cjmcu(){
-	python tests/test_cjmcu_ads1115.py
-}
-test_mhz19b(){
-	python tests/test_mhz19b.py
-}
+
+# various sensor tests
+test_bme(){ python tests/test_bme280test.py; }
+test_cjmcu(){ python tests/test_cjmcu_ads1115.py; }
+test_mhz19b(){ python tests/test_mhz19b.py; }
+
+# network tests
 hostTest(){
 	resp=$(curl -o /dev/null -i -L -s -w "%{http_code}\n" "$host/test")
 	if [ "$resp" == 200 ]; then
@@ -96,6 +98,9 @@ post_test(){
 		echo "$resp"
 	fi
 }
+
+
+
 cd /home/pi || error "cd failed ???"
 
 echo "Welcome to the PiAQI autoinstallation script!"
@@ -145,6 +150,7 @@ echo "currently supported sensors; BME280 (i2c), CJMCU-6814 (i2c, through ADS111
 read -r -p "Please hook up the sensors you would like to use and press enter to continue"
 
 echo "Looking for BME280 Sensor..."
+
 bme="$(test_bme)"
 if [ "$bme" == 0 ]; then
 	echo "BME sensor found!"
@@ -171,7 +177,7 @@ fi
 
 
 flag=1
-while ! [ $flag -eq 0 ]; do
+while [ $flag -eq 1 ]; do
 	echo "Please enter the url provided by the organizer ex. https://albanylovestheair.com"
 	read -r host
 	echo "you entered $host is this correct? [Y/n]"
@@ -211,17 +217,18 @@ while ! [ $flag -eq 0 ]; do
 		else
 			flag=1
 		fi
+
 		if ! [ "$flag" -eq 0 ]; then
 			echo "checking uniqueness..."
 			flag=$(checkUnique "$name")
+
 			if [ "$flag" -eq 0 ]; then
 				echo "Your sensor name is unique! Proceeding..."
 			else
 				echo "Someone already snagged that name :( please try a different one"
 			fi
+
 		fi
-
-
 
 	else
 		echo "your entry \($name\) did not meet the requirements :( please try again"

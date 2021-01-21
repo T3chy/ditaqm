@@ -96,6 +96,7 @@ cd /home/pi || error "cd failed ???"
 echo "Welcome to the PiAQI autoinstallation script!"
 
 echo "Pulling dependancies..."
+
 pulldeps || error "dependancy pull failed!"
 
 echo "dependancies pulled!"

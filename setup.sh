@@ -12,7 +12,7 @@ i2cDeviceExists() {
 		(*) return 1
 	esac
 }
-pulldeps(){
+pullDeps(){
 	apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
 	# git, cuz duh
 	apt-get install -y git
@@ -47,7 +47,7 @@ pulldeps(){
 	sudo systemctl start pigpiod || error "failed to start pipgpiod!"
 
 }
-enablei2c(){
+enableI2c(){
 	if ! i2cdetect -y 1 > /dev/null; then
 		echo "i2c-bcm2708" >> /etc/modules
 		echo "i2c-dev" >> /etc/modules
@@ -58,14 +58,14 @@ enablei2c(){
 		echo 0
 	fi
 }
-bmeTest(){
-	python tests/bme280Test.py
+test_bme(){
+	python tests/test_bme280test.py
 }
-cjmcuTest(){
-	python tests/cjmcuADS1115Test.py
+test_cjmcu(){
+	python tests/test_cjmcu_ads1115.py
 }
-mhz19bTest(){
-	python tests/mhz19Test.py
+test_mhz19b(){
+	python tests/test_mhz19b.py
 }
 hostTest(){
 	resp=$(curl -o /dev/null -i -L -s -w "%{http_code}\n" "$host/test")
@@ -83,7 +83,7 @@ checkUnique(){
 		echo 1
 	fi
 }
-testPost(){
+post_test(){
 	resp=$(python postaqi.py firsttry)
 	if [ "$resp" == "<Response [200]>" ]; then
 		echo 0
@@ -97,11 +97,11 @@ echo "Welcome to the PiAQI autoinstallation script!"
 
 echo "Pulling dependancies..."
 
-pulldeps || error "dependancy pull failed!"
+pullDeps || error "dependancy pull failed!"
 
 echo "dependancies pulled!"
 
-if [ "$(enablei2c)" -eq 1 ]; then
+if [ "$(enableI2c)" -eq 1 ]; then
 	read -r -p "i2c has just been enabled. We now need to reboot (you will be disconnected). Press enter to continue, and then rerun this script with \"sudo ./setup.sh\" once you reconnect"
 	reboot
 fi
@@ -140,7 +140,7 @@ echo "currently supported sensors; BME280 (i2c), CJMCU-6814 (i2c, through ADS111
 read -r -p "Please hook up the sensors you would like to use and press enter to continue"
 
 echo "Looking for BME280 Sensor..."
-bme="$(bmeTest)"
+bme="$(test_bme)"
 if [ "$bme" == 0 ]; then
 	echo "BME sensor found!"
 else
@@ -148,7 +148,7 @@ else
 fi
 
 echo "Looking for CHMCU-6814 Sensor..."
-cjmcu="$(cjmcuTest)"
+cjmcu="$(test_cjmcu)"
 if [ "$cjmcu" == 0 ]; then
 	echo "CHMCU-6814 sensor found!"
 else
@@ -157,7 +157,7 @@ fi
 
 
 echo "Looking for CHMCU-6814 Sensor..."
-mhz19b="$(mhz19bTest)"
+mhz19b="$(test_mhz19b)"
 if [ "$mhz19b" == 0 ]; then
 	echo "mhz19b sensor found!"
 else
@@ -229,7 +229,7 @@ echo "configuration stored!"
 
 echo "attempting to make a POST request..."
 
-try=$(testPost)
+try=$(post_test)
 if [ "$try" -eq 0 ]; then
 	echo "success! enabling automatic restart on boot"
 else

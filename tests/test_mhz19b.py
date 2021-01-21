@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-"""Test if a MH-Z19 CO2 sensor is connected"""
+"""Test if a MH-Z19b CO2 sensor is connected"""
 import pigpio # http://abyz.co.uk/rpi/pigpio/python.html
-import read_PWM
+import read_pwm
 import time
 
 # Read the MH-Z19 CO2 sensor

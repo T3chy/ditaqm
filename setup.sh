@@ -12,7 +12,8 @@ i2cDeviceExists() {
 		(*) return 1
 	esac
 }
-pullDeps(){
+pullDeps(){ #TODO try to not run this after reboot
+
 	apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
 	# git, cuz duh
 	apt-get install -y git
@@ -21,7 +22,7 @@ pullDeps(){
 	cd diyaqi || error "can't enter source directory. Git clone probably failed"
 
 	# python, for obvious reasons
-	apt-get install -y python3 python3-pip || exit 1
+	apt-get install -y python3 python3-pip || error "Couldn't install python"
 	pip3 install --upgrade setuptools
 
 	#make python3 default
@@ -33,15 +34,19 @@ pullDeps(){
 	apt-get install -y curl
 
 	# i2ctools to detect device
+
 	apt-get install -y i2c-tools
 
-	# sensor / boardio deps
+	# # sensor / boardio deps
 
+	# i2c stuff
 	pip3 install RPI.GPIO || exit 1
 	pip3 install adafruit-blinka
 	pip3 install adafruit-circuitpython-bme280
 	pip3 install adafruit-circuitpython-ads1x15
 	pip3 install pigpio
+
+	# pwm for the mhz19b
 	apt-get install -y pigpio python-pigpio python3-pigpio
 	sudo systemctl enable pigpiod || error "failed to enable pigpiod!"
 	sudo systemctl start pigpiod || error "failed to start pipgpiod!"

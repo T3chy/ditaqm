@@ -1,1 +1,1 @@
-pls write good code 
+write good code pls

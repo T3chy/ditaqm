@@ -1,23 +1,24 @@
+#!/usr/bin/python3
+"""Test if a MH-Z19 CO2 sensor is connected"""
 import pigpio # http://abyz.co.uk/rpi/pigpio/python.html
 import read_PWM
 import time
 
 # Read the MH-Z19 CO2 sensor
 PWM_GPIO = 4 # physical pin 7
-var = 1
+
+CODE = 0
 pi = pigpio.pi() # Grants access to Pi's GPIO
-p = read_PWM.reader(pi, PWM_GPIO)
+pulse = read_PWM.reader(pi, PWM_GPIO)
 
 time.sleep(5)
-try:
-    pp = p.pulse_period()
-    pw = p.pulse_width()
-    if pp == 0.0 and pw == 0.0:
-        var = 1
-    else:
-        var = 0
+try: #TODO maybe do reasonable value checking?
+    pulse_width = pulse.pulse_period()
+    pulse_width = pulse.pulse_width()
+    if pulse_width == 0.0 and pulse_width == 0.0:
+        CODE = 1
 except:
     pass
-print(var)
-p.cancel()
+print(CODE)
+pulse.cancel()
 pi.stop()

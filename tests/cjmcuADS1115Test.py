@@ -1,13 +1,15 @@
+#!/usr/bin/python3
+"""Test the MiCS-6814 onness via ads1115"""
 import time
+import math
 import board
 import busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
-import math
 
 
-val = 1
-try:
+CODE = 1
+try: # TODO do reasonable value checking?
     # Create the I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -18,7 +20,7 @@ try:
     chan0 = AnalogIn(ads, ADS.P0)
     chan1 = AnalogIn(ads, ADS.P1)
     chan2 = AnalogIn(ads, ADS.P2)
-    val = 0
+    CODE = 0
 except:
     pass
-print(val)
+print(CODE)

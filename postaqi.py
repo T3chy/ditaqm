@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # TODO maybe recheck sensor connectedness at boot
-"""Periodically send bme280 data via POST request to a designated host"""
+"""Periodically send bme280 data via POST request using the information stored in the file 'config'"""
+
 import sys
 import time
 import math
@@ -13,7 +14,7 @@ import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import pigpio
 sys.path.append("tests/")
-import read_PWM
+import read_pwm
 
 # constants
 # resistance -> ppm constants (in zero air)
@@ -100,7 +101,7 @@ def update():
 
     if MHZ19B:
         raspi = pigpio.pi()
-        pulse = read_PWM.reader(raspi, PWM_GPIO)
+        pulse = read_PWM.PwmReader(raspi, PWM_GPIO)
         time.sleep(5)
         pulse_period = pulse.pulse_period()
         pulse_width = pulse.pulse_width()

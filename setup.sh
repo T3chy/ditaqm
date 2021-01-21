@@ -69,7 +69,7 @@ enableI2c(){
 }
 
 # various sensor tests
-test_bme(){ python tests/test_bme280test.py; }
+test_bme(){ python tests/test_bme280.py; }
 test_cjmcu(){ python tests/test_cjmcu_ads1115.py; }
 test_mhz19b(){ python tests/test_mhz19b.py; }
 
@@ -156,6 +156,7 @@ if [ "$bme" == 0 ]; then
 	echo "BME sensor found!"
 else
 	echo "no BME sensor found :("
+	bme=1
 fi
 
 echo "Looking for CHMCU-6814 Sensor..."
@@ -164,6 +165,7 @@ if [ "$cjmcu" == 0 ]; then
 	echo "CHMCU-6814 sensor found!"
 else
 	echo "CHMCU-6814 no sensor found :("
+	cjmcu=1
 fi
 
 
@@ -173,6 +175,7 @@ if [ "$mhz19b" == 0 ]; then
 	echo "mhz19b sensor found!"
 else
 	echo "no mhz19b sensor found :("
+	mhz19b=1
 fi
 
 

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-"""Test the MiCS-6814 onness via ads1115"""
-import time
-import math
+"""Test the MiCS-6814 onness via ads1115 by attempting to initalize it, returns 0 on success and 1 on failure"""
+
 import board
 import busio
 import adafruit_ads1x15.ads1115 as ADS
@@ -21,6 +20,10 @@ try: # TODO do reasonable value checking?
     chan1 = AnalogIn(ads, ADS.P1)
     chan2 = AnalogIn(ads, ADS.P2)
     CODE = 0
-except:
+except IOError:
     pass
+except ValueError:
+    pass
+except Exception as e:
+    print(e)
 print(CODE)

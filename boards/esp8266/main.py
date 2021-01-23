@@ -16,12 +16,19 @@ Host: {host}\r
 Connection: close\r
 \r\n"""
 
+try: # TODO maybe the sensor bit vals should be int()ed
+    # initalize sensors, host, name from config file
+    with open("config", "r",) as CONFIG:
+        HOST = CONFIG.readline().strip("\n") + "/in"
+        NAME = CONFIG.readline().strip("\n")
+        BME = CONFIG.readline().strip("\n")
+        CJMCU= CONFIG.readline().strip("\n")
+        MHZ19B= CONFIG.readline().strip("\n")
+except IOError as error: # config file probably not created if this fails
+    print("config file has likley not been created! Please run \"sudo ./setup.sh\"")
+    print("error trace below:")
+    print(error)
 
-def dict_to_body(data):
-    body = ""
-    for key in data:
-        body = body + str(key) + "=" + str(data[key]) + "&"
-    return body
 def get_bme_data(res):
     """get new data from the BME280 sensor"""
     bme = BME280.BME280(i2c=i2c)
@@ -30,7 +37,11 @@ def get_bme_data(res):
     res["pressure"] = bme.pressure
     res["name"] = "esptest"
     return res
-
+def dict_to_body(data):
+    body = ""
+    for key in data:
+        body = body + str(key) + "=" + str(data[key]) + "&"
+    return body
 def send():
     body = dict_to_body(get_bme_data({}))
     body_bytes = body.encode('ascii')

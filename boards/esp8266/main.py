@@ -1,10 +1,11 @@
 import socket
+import time
 from machine import Pin, I2C
 import BME280
 
 HOST = "192.168.3.187"
 PORT = 80
-
+#TODO actually make this error-resistent and add support for others
 i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
 
 HEADERS = """\
@@ -48,3 +49,6 @@ def send():
     s.sendall(payload)
 
     print(s.recv(1024))
+while True:
+    send()
+    time.sleep(5)

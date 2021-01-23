@@ -101,7 +101,7 @@ def update():
 
     if MHZ19B:
         raspi = pigpio.pi()
-        pulse = read_PWM.PwmReader(raspi, PWM_GPIO)
+        pulse = read_pwm.PwmReader(raspi, PWM_GPIO)
         time.sleep(5)
         pulse_period = pulse.pulse_period()
         pulse_width = pulse.pulse_width()

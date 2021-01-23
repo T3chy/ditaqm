@@ -17,11 +17,15 @@ echo "flashing firmware..."
 esptool.py --port /dev/ttyUSB0 --baud 460800 write_flash --flash_size=detect -fm dio 0 "firmware.bin"
 
 wait $!
+sleep 5
 echo "copying source files to device..."
 
-sudo ampy --port /dev/ttyUSB0 --baud 115200 put boot.py
-sudo ampy --port /dev/ttyUSB0 --baud 115200 put BME280.py
-sudo ampy --port /dev/ttyUSB0 --baud 115200 put main.py
+ampy --port /dev/ttyUSB0 --baud 115200 put boot.py
+echo "boot script copied!"
+ampy --port /dev/ttyUSB0 --baud 115200 put BME280.py
+echo "BME script copied!"
+ampy --port /dev/ttyUSB0 --baud 115200 put main.py
+echo "main script copied!"
 
 echo "entering live prompt. Enter ctrl-a and then ctrl-x to exit"
-sudo picocom /dev/ttyUSB0 -b115200
+picocom /dev/ttyUSB0 -b115200

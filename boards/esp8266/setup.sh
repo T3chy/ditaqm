@@ -26,6 +26,4 @@ ampy --port /dev/ttyUSB0 --baud 115200 put BME280.py
 echo "BME script copied!"
 ampy --port /dev/ttyUSB0 --baud 115200 put main.py
 echo "main script copied!"
-
-echo "entering live prompt. Enter ctrl-a and then ctrl-x to exit"
-picocom /dev/ttyUSB0 -b115200
+echo "everything should be set up! Reboot (unplug and replug) your device to start POSTing!"

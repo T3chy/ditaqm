@@ -2,21 +2,22 @@
 
 # see https://cdn-shop.adafruit.com/datasheets/ads1115.pdf
 from machine import Pin, I2C
+import time
 i2c = I2C(scl=Pin(5), sda=Pin(4))
 ADS_ADDR = 0x48
 
 class ADS1115:
-    def __init__(i2c):
+    def __init__(self, i2c):
         self.i2c = i2c
         # voltageConv = 6.114 / 325768.0 I think default gain (2.048v) is fine??
     def read(self):
-        ADSwrite = []
-        """Conversion Register; read only"""
-        ADSwrite.append(0x01)
+        voltages = [0,0,0,0]
+        ADSwrite = [0x00, 0x00, 0x00]
+        voltageConv = 6.114 / 32768.0 # temp
         """iterate over the 4 analog inputs by writing to the config register and then reading"""
-        ADSwrite.append(0x00)
-        ADSwrite.append(0x00)
         for i in range(4):
+            """Config Register Address"""
+            ADSwrite[0] = 0x01
             """Config Register, 16 bits long"""
             """bit 15 = 1 (begin single conversion)"""
             """bits 11-9 = 000 (+/- 6.144V)""" # TODO maybe this could be lower
@@ -41,14 +42,14 @@ class ADS1115:
             bit 2 = 0 (non-latching comparator)
             bits 1-0 = 11 (disable comparator)"""
             ADSwrite[2] = 0x83 # 10000011
-            self.i2c.
-
-
-
+            self.i2c.writeto(ADS_ADDR, bytes(ADSwrite)) #write 2 bytes to the config register
+            """Conversion register address"""
+            ADSwrite[0] = 0x00; # 00000000
+            """Wait for conversion register to populate, 20ms is probably fine given sampling rate lmao"""
+            time.sleep(.02)
+            print(self.i2c.readfrom(ADS_ADDR, 2)) # conversion register is 2 bytes big
+            """Gonna need to left shift first byte 8 bits left to stitch the values together""" #TODO do that
+            reading = 0
+            voltages[i] = reading * voltageConv
     def write(self):
-
-
-
-
-
-# read
+        pass # TODO write this lmao

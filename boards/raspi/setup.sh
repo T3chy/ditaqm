@@ -9,14 +9,16 @@ error() { clear; printf "ERROR:\\n%s\\n" "$1" >&2; exit 1;}
 
 pullDeps(){ #TODO try to not run this after reboot
 
+	# git, cuz duh
+	apt-get install -y git
+
+	# try to not repull deps
 	[ -d diyaqi/boards/raspi ] || git clone https://github.com/t3chy/diyaqi
 	cd diyaqi/boards/raspi || error "can't enter source directory. Git clone probably failed"
 	if ! [ -d ran ]; then {
 		touch ran
 
 		apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
-		# git, cuz duh
-		apt-get install -y git
 
 
 		# python, for obvious reasons

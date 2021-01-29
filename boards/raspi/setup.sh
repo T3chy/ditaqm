@@ -348,7 +348,7 @@ try=$(post_test)
 if [ "$try" -eq 0 ]; then
 	echo "success! enabling automatic restart on boot"
 else
-	echo "failure, see error trace below :( exiting...."
+	echo "failure, see error trace above :( exiting...."
 	echo "$try"
 	exit 1
 fi

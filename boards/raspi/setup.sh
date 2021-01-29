@@ -15,7 +15,7 @@ pullDeps(){ #TODO try to not run this after reboot
 	# try to not repull deps
 	[ -d diyaqi/boards/raspi ] || git clone https://github.com/t3chy/diyaqi
 	cd diyaqi/boards/raspi || error "can't enter source directory. Git clone probably failed"
-	if ! [ -d ran ]; then {
+	if ! [ -f ran ]; then {
 		touch ran
 
 		apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"

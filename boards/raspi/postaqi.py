@@ -27,15 +27,14 @@ PWM_GPIO = 4 # physical port 7
 
 try: # TODO maybe the sensor bit vals should be int()ed
     # initalize sensors, host, name from config file
-    with open("config.json", "r",) as f:
-        CONFIG = json.loads(f)
-        USERNAME = CONFIG["username"]
-        PASSWORD = CONFIG["password"]
-        HOST = CONFIG["host"]
-        SENSOR_NAME = CONFIG["sensorname"]
-        BME = CONFIG["BME"]
-        CJMCU = CONFIG["CJMCU"]
-        MHZ19B = CONFIG["MHZ19B"]
+    CONFIG = json.loads("config.json")
+    USERNAME = CONFIG["username"]
+    PASSWORD = CONFIG["password"]
+    HOST = CONFIG["host"]
+    SENSOR_NAME = CONFIG["sensorname"]
+    BME = CONFIG["BME"]
+    CJMCU = CONFIG["CJMCU"]
+    MHZ19B = CONFIG["MHZ19B"]
 except IOError as error: # config file probably not created if this fails
     print("config file has likley not been created! Please run \"sudo ./setup.sh\"")
     print("error trace below:")

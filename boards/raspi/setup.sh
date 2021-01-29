@@ -109,6 +109,13 @@ post_test(){
 	fi
 }
 
+# login stuff
+checkLogin(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/login" | jq -r '.code'
+}
+regUser(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/register" | jq -r '.code'
+}
 
 
 cd /home/pi || error "cd failed ???"
@@ -221,12 +228,6 @@ done
 flag="n"
 echo "Do you have a login? If not, we will create one shortly [y/N]"
 read -r flag
-checkLogin(){
-	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/login" | jq -r '.code'
-}
-regUser(){
-	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/register" | jq -r '.code'
-}
 
 
 code=1
@@ -334,7 +335,7 @@ done
 
 echo "saving configuration..."
 
-jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "BME":'\""$BME"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
+jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "username":'\""$user"\"', "password":'\""$pass"\"', "BME":'\""$BME"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
 
 
 echo "configuration stored!"

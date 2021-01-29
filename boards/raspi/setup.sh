@@ -218,6 +218,90 @@ while [ $flag -eq 1 ]; do
 	fi
 done
 
+flag="n"
+echo "Do you have a login? If not, we will create one shortly [y/N]"
+read -r flag
+checkLogin(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/login" | jq -r '.code'
+}
+regUser(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/register" | jq -r '.code'
+}
+
+
+code=1
+if [ "$flag" == "y" ]; then
+	while ! [ $code == 200 ]; do
+		echo "What's your username?"
+		read -r user
+		echo "What's your password?"
+		read -r pass
+		code=$(checkLogin "$user" "$pass")
+		if [ "$code" == 200 ]; then
+			echo "login successful! Proceeding..."
+		fi
+		if [ "$code" == 400 ]; then
+			echo "Please enter both a username and password!"
+		fi
+		if [ "$code" == 204 ]; then
+			echo "Username and password do not match :("
+		fi
+		if [ "$code" == 206 ]; then
+			echo "This username does not exist! Would you like to create an account with this username? [Y/n]"
+			read -r cflag
+			if ! [ "$cflag" == n ]; then
+				flag="n"
+				break
+			fi
+		fi
+	done
+fi
+code=1
+if ! [ "$flag" == "y" ]; then
+	while ! [ $code == 200 ]; do
+
+		echo "let's make you an account!"
+		flag=1
+		if [ -n "$user" ]; then
+			flag=0
+		fi
+		while [ $flag -eq 1 ]; do
+			echo "what do you want your username to be?"
+			read -r user
+			echo "you entered $user\. is that correct? [Y/n]"
+			read -r flag
+			if ! [ "$flag" == "n" ]; then
+				flag=0
+			else
+				flag=1
+			fi
+		done
+		echo "Welcome, $user\!"
+		while [ $flag -eq 1 ]; do
+			echo "Please enter a password"
+			read -r pass
+			echo "you entered $pass\. is that correct? [Y/n]"
+			read -r flag
+			if ! [ "$flag" == "n" ]; then
+				flag=0
+			else
+				flag=1
+			fi
+		done
+		echo "attempting to register user..."
+		code=$(regUser user pass)
+		if [ "$code" == 200 ]; then
+			echo "Registration successful! Proceeding..."
+		fi
+		if [ "$code" == 206 ]; then
+			echo "user already exists :( please choose a unique username"
+		fi
+		if [ "$code" == 400 ]; then
+			echo "an unknown error occured :( super bummer"
+		fi
+	done
+fi
+
 flag=1
 while ! [ $flag -eq 0 ]; do
 	echo "enter what you'd like your sensor to be called. Please make it only upper and lower case letteers, numbers, and no spaces. Ex. \"ElamHouse1\""
@@ -248,9 +332,9 @@ while ! [ $flag -eq 0 ]; do
 	fi
 done
 
-printf "%s\n%s\n%d\n%d\n%d\n" "$host" "$name" "$bme" "$cjmcu" "$mhz19b" > config
+echo "saving configuration..."
 
-jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "BME":'\""$BME"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}'
+jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "BME":'\""$BME"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
 
 
 echo "configuration stored!"

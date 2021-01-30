@@ -1,4 +1,4 @@
-# Elam's Air Quality RasPi Based Sensor Deployment Protocol!
+# DIYAQI Sensor Deployment Protocol: Raspberry Pi
 
 ## Welcome!
 
@@ -87,6 +87,8 @@ Once you get into the boot partition, make a file called "ssh" with no extension
 **SSH will now be enabled on first boot!**
 
 ### Automatically connecting to WiFi
+
+**Note: skip this section if you are using ethernet (wired internet) for internet connectivity**
 
 To automatically connect to wifi, we need to change a file called "wpa_supplicant.conf"; This file manages your Raspberry Pi automatically connecting to wifi on boot
 
@@ -179,10 +181,10 @@ We now need to set up the sensor, configure where we're sending the data, and co
 All you need to do is run the following command while you're at the `pi@raspberrypi:~ $` prompt
 
 ```
-wget https://raw.githubusercontent.com/T3chy/diyaqi/main/setup.sh && sudo chmod +x setup.sh && sudo ./setup.sh
+wget https://raw.githubusercontent.com/T3chy/diyaqi/main/boards/raspi/setup.sh && sudo chmod +x setup.sh && sudo ./setup.sh
 ```
 
-**Note: you may be asked for your password after running this command; simple enter 'raspberry' (without the quotes) or the new password you previosly set and press enter.**
+**You will be prompted for your password after running this command; simple enter 'raspberry' (without the quotes) or the new password you previosly set and press enter.**
 
 Follow the prompts in the script, and you should be good to go! Congratulations!!
 

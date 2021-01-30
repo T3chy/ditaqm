@@ -1,5 +1,6 @@
 #!/bin/bash
 # copyleft me (Elam) 2021; keep the software free, baby
+# TODO check if a config file already exists
 if [ "$(id -u)" != "0" ]; then
 	echo "You must be the superuser to run this script :( try adding \"sudo\" at the begining of your command and rerun" >&2
 	exit 1
@@ -111,7 +112,7 @@ post_test(){
 	fi
 }
 
-# login stuff
+# login / registration stuff
 checkLogin(){
 	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/login" | jq -r '.code'
 }
@@ -173,18 +174,20 @@ echo "Looking for BME280 Sensor..."
 bme="$(test_bme)"
 if [ "$bme" == 0 ]; then
 	echo "BME sensor found!"
+	bme=1
 else
 	echo "no BME sensor found :("
-	bme=1
+	bme=0
 fi
 
 echo "Looking for CHMCU-6814 Sensor..."
 cjmcu="$(test_cjmcu)"
 if [ "$cjmcu" == 0 ]; then
 	echo "CHMCU-6814 sensor found!"
+	cjmcu=1
 else
 	echo "CHMCU-6814 no sensor found :("
-	cjmcu=1
+	cjmcu=0
 fi
 
 
@@ -192,9 +195,10 @@ echo "Looking for CHMCU-6814 Sensor..."
 mhz19b="$(test_mhz19b)"
 if [ "$mhz19b" == 0 ]; then
 	echo "mhz19b sensor found!"
+	mhz19b=1
 else
 	echo "no mhz19b sensor found :("
-	mhz19b=1
+	mhz19b=0
 fi
 
 
@@ -217,11 +221,8 @@ while [ $flag -eq 1 ]; do
 		else
 			echo "host is not up :( retry? [y/N]"
 			read -r flag
-			if [ "$flag" == "y" ]; then
-				flag=0
-			else
+			if ! [ "$flag" == "y" ]; then
 				echo "exiting..."
-				exit 1
 			fi
 		fi
 	fi
@@ -306,6 +307,9 @@ if ! [ "$flag" == "y" ]; then
 fi
 
 flag=1
+regSens(){
+	curl -s -d "username=$1" -d "password=$2" -d "sensorname=$3" -X POST "$host/api/register" | jq -r '.code'
+}
 while ! [ $flag -eq 0 ]; do
 	echo "enter what you'd like your sensor to be called. Please make it only upper and lower case letteers, numbers, and no spaces. Ex. \"ElamHouse1\""
 	read -r name
@@ -323,7 +327,10 @@ while ! [ $flag -eq 0 ]; do
 			flag=$(checkUnique "$name")
 
 			if [ "$flag" -eq 0 ]; then
-				echo "Your sensor name is unique! Proceeding..."
+				echo "Your sensor name is unique!"
+				echo "Registering sensor..."
+				code=$(regSens user pass name)"
+
 			else
 				echo "Someone already snagged that name :( please try a different one"
 			fi
@@ -337,7 +344,7 @@ done
 
 echo "saving configuration..."
 
-jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "username":'\""$user"\"', "password":'\""$pass"\"', "BME":'\""$BME"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
+jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "username":'\""$user"\"', "password":'\""$pass"\"', "BME":'\""$bme"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
 
 
 echo "configuration stored!"

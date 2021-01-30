@@ -27,14 +27,15 @@ PWM_GPIO = 4 # physical port 7
 
 try: # TODO maybe the sensor bit vals should be int()ed
     # initalize sensors, host, name from config file
-    CONFIG = json.loads("config.json")
-    USERNAME = CONFIG["username"]
-    PASSWORD = CONFIG["password"]
-    HOST = CONFIG["host"]
-    SENSOR_NAME = CONFIG["sensorname"]
-    BME = CONFIG["BME"]
-    CJMCU = CONFIG["CJMCU"]
-    MHZ19B = CONFIG["MHZ19B"]
+    with open("config.json", "r") as f:
+        CONFIG = json.loads(f)
+        USERNAME = CONFIG["username"]
+        PASSWORD = CONFIG["password"]
+        HOST = CONFIG["host"]
+        SENSOR_NAME = CONFIG["sensorname"]
+        BME = int(CONFIG["BME"])
+        CJMCU = int(CONFIG["CJMCU"])
+        MHZ19B = int(CONFIG["MHZ19B"])
 except IOError as error: # config file probably not created if this fails
     print("config file has likley not been created! Please run \"sudo ./setup.sh\"")
     print("error trace below:")
@@ -111,18 +112,18 @@ def update():
         res["CO2"] = (5000.0)*(pulse_width-2.0)/(pulse_period-4.0)
     res["username"] = USERNAME
     res["password"] = PASSWORD
-    res["name"] = SENSOR_NAME
+    res["sensorname"] = SENSOR_NAME
     return res
 
 if len(sys.argv) == 2:
     try:
-        print(requests.post(HOST, data=update()))
+        print(requests.post(HOST + "/api/in", data=update()))
     except Exception as e:
         print(e)
 else:
     while True:
         try:
-            print(requests.post(HOST, data=update()))
+            print(requests.post(HOST + "/api/in", data=update()))
         except Exception as e:
             print(e)
         time.sleep(55)

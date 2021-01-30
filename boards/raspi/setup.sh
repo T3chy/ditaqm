@@ -119,6 +119,9 @@ checkLogin(){
 regUser(){
 	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/register" | jq -r '.code'
 }
+regSens(){
+	curl -s -d "username=$1" -d "password=$2" -d "sensorname=$3" -X POST "$host/api/register" | jq -r '.code'
+}
 
 
 cd /home/pi || error "cd failed ???"
@@ -307,9 +310,6 @@ if ! [ "$flag" == "y" ]; then
 fi
 
 flag=1
-regSens(){
-	curl -s -d "username=$1" -d "password=$2" -d "sensorname=$3" -X POST "$host/api/register" | jq -r '.code'
-}
 while ! [ $flag -eq 0 ]; do
 	echo "enter what you'd like your sensor to be called. Please make it only upper and lower case letteers, numbers, and no spaces. Ex. \"ElamHouse1\""
 	read -r name
@@ -321,15 +321,13 @@ while ! [ $flag -eq 0 ]; do
 		else
 			flag=1
 		fi
-
 		if ! [ "$flag" -eq 0 ]; then
 			echo "checking uniqueness..."
 			flag=$(checkUnique "$name")
-
 			if [ "$flag" -eq 0 ]; then
 				echo "Your sensor name is unique!"
 				echo "Registering sensor..."
-				code=$(regSens user pass name)"
+				code=$(regSens user pass name)
 
 			else
 				echo "Someone already snagged that name :( please try a different one"

@@ -2,11 +2,14 @@ import socket
 import time
 from machine import Pin, I2C
 import BME280
+import tests
+import json
 
 HOST = "192.168.3.187"
 PORT = 80
 #TODO actually make this error-resistent and add support for others
 i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
+tests.update_config()
 
 HEADERS = """\
 POST /in HTTP/1.1\r
@@ -16,34 +19,46 @@ Host: {host}\r
 Connection: close\r
 \r\n"""
 
-try: # TODO maybe the sensor bit vals should be int()ed
+try:
     # initalize sensors, host, name from config file
-    with open("config", "r",) as CONFIG:
-        HOST = CONFIG.readline().strip("\n") + "/in"
-        NAME = CONFIG.readline().strip("\n")
-        BME = CONFIG.readline().strip("\n")
-        CJMCU= CONFIG.readline().strip("\n")
-        MHZ19B= CONFIG.readline().strip("\n")
+    with open("config.json", "r") as f:
+        CONFIG = json.loads(f)
+        USERNAME = CONFIG["username"]
+        PASSWORD = CONFIG["password"]
+        HOST = CONFIG["host"] + "/api/in"
+        SENSOR_NAME = CONFIG["sensorname"]
+        BME = int(CONFIG["BME"])
+        CJMCU = int(CONFIG["CJMCU"])
+        MHZ19B = int(CONFIG["MHZ19B"])
 except IOError as error: # config file probably not created if this fails
     print("config file has likley not been created! Please run \"sudo ./setup.sh\"")
     print("error trace below:")
     print(error)
 
-def get_bme_data(res):
-    """get new data from the BME280 sensor"""
-    bme = BME280.BME280(i2c=i2c)
-    res["temp"] = bme.temperature
-    res["humidity"] = bme.humidity
-    res["pressure"] = bme.pressure
-    res["name"] = "esptest"
+def update():
+    """get new data from sensors detected in the config"""
+    res = {}
+    try:
+        if BME:
+            bme = BME280.BME280(i2c=i2c)
+            res["temp"] = bme.temperature
+            res["humidity"] = bme.humidity
+            res["pressure"] = bme.pressure
+    except:
+        tests.update_config()
     return res
 def dict_to_body(data):
     body = ""
+
+    data["username"] = USERNAME
+    data["password"] = PASSWORD
+    data["sensorname"] = SENSOR_NAME
+
     for key in data:
         body = body + str(key) + "=" + str(data[key]) + "&"
     return body
 def send():
-    body = dict_to_body(get_bme_data({}))
+    body = dict_to_body(update())
     body_bytes = body.encode('ascii')
 
     header_bytes = HEADERS.format(

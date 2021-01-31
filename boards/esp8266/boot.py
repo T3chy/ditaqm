@@ -1,6 +1,7 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 #import esp
 def do_connect():
+    """Connect to a wifi network"""
     import network
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
@@ -11,6 +12,7 @@ def do_connect():
             pass
     print('network config:', sta_if.ifconfig())
 def http_get(url):
+    """Make an http request"""
     import socket
     _, _, host, path = url.split('/', 3)
     addr = socket.getaddrinfo(host, 80)[0][-1]
@@ -24,6 +26,8 @@ def http_get(url):
         else:
             break
     s.close()
+import tests
+tests.update_config()
 import uos, machine
 import gc
 gc.collect()

@@ -1,6 +1,7 @@
 import machine
 import time
 import re
+import json
 led = machine.Pin(2,machine.Pin.OUT)
 led.off()
 
@@ -10,7 +11,7 @@ led.off()
 # as Access Point mode.
 import network
 ssid = 'ESP32-AP-WebServer'
-password = '123456789'
+passwd = '123456789'
 
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
@@ -19,7 +20,7 @@ while not sta.active():
 scan = [net[0] for net in sta.scan()]
 ap = network.WLAN(network.AP_IF)
 ap.active(True)
-ap.config(essid=ssid, password=password)
+ap.config(essid=ssid, password=passwd)
 while not ap.active():
     pass
 print('network config:', ap.ifconfig())
@@ -71,49 +72,88 @@ def web_page():
            </body>
         </html>"""
     return html_page
+def success():
+    return """
+        <html>
+            <body>
+                <h1>
+                    success! Connect (on the device you want to access the cluster from) to the wifi network you just entered the credentials for, and follow the instructions on the OLED!
+                </h1>
+            </body>
+        </html> """
 
 
 print('serving')
-while True:
-    # Socket accept()
-    conn, addr = s.accept()
-    # print("Got connection from %s" % str(addr))
+flag = 0
+with open("config.json", "r") as f:
+    try:
+        data = json.load(f)
+        sta.connect(str(data["ssid"]), str(data["passwd"]))
+        counter = 0
+        while not sta.isconnected():
+            time.sleep(1)
+            counter += 1
+            if counter > 5:
+                continue
+        if sta.isconnected():
+            flag = 1
+    except Exception as e:
+        print(e)
 
-    # Socket receive()
-    request=conn.recv(1024)
-    # print("Content %s" % str(request))
-    ssid = None
-    passwd = None
-    request = str(request, 'utf8')
-    if "GET /?ssid=" in request:
-        print('ssid request time')
-        try:
-            ssid = re.search(r"ssid=(.*?)\&", request).group(1).strip()
-            passwd = re.search(r"pass=(.*?)\ HTTP", request).group(1).strip()
-            if ssid and passwd:
-                print("ssid:", ssid)
-                print("pass:", passwd)
-                sta.connect(str(ssid), str(passwd))
-                counter = 0
-                while not sta.isconnected():
-                    time.sleep(1)
-                    counter += 1
-                    if counter > 5:
-                        continue
-                print("connected! " + str(sta.ifconfig()))
-                ap.active(False)
-                break
-        except Exception as e:
-            print(e)
-    # GET /?ssid=MlgWifi&pass=xXGitGudXx HTTP
-    # /?ssid=MlgWifi&pass=xXGitGudXx
+if not flag:
+    while True:
+        # Socket accept()
+        conn, addr = s.accept()
+        # print("Got connection from %s" % str(addr))
 
-    # Socket send()
-    response = web_page()
-    conn.send('HTTP/1.1 200 OK\n')
-    conn.send('Content-Type: text/html\n')
-    conn.send('Connection: close\n\n')
-    conn.sendall(response)
+        # Socket receive()
+        request=conn.recv(1024)
+        # print("Content %s" % str(request))
+        ssid = None
+        passwd = None
+        request = str(request, 'utf8')
+        if "GET /?ssid=" in request:
+            print('ssid request time')
+            try:
+                ssid = re.search(r"ssid=(.*?)\&", request).group(1).strip()
+                passwd = re.search(r"pass=(.*?)\ HTTP", request).group(1).strip()
+                if ssid and passwd:
+                    print("ssid:", ssid)
+                    print("pass:", passwd)
+                    sta.connect(str(ssid), str(passwd))
+                    counter = 0
+                    while not sta.isconnected():
+                        time.sleep(1)
+                        counter += 1
+                        if counter > 5:
+                            continue
+                    print("connected! " + str(sta.ifconfig()))
+                    ap.active(False)
+                    response = success()
+                    conn.send('HTTP/1.1 200 OK\n')
+                    conn.send('Content-Type: text/html\n')
+                    conn.send('Connection: close\n\n')
+                    conn.sendall(response)
+                    break
+            except Exception as e:
+                print(e)
 
-    # Socket close()
-    conn.close()
+        # Socket send()
+        response = web_page()
+        conn.send('HTTP/1.1 200 OK\n')
+        conn.send('Content-Type: text/html\n')
+        conn.send('Connection: close\n\n')
+        conn.sendall(response)
+        # Socket close()
+        conn.close()
+else:
+    ap.active(False)
+    print('alreadfy conncetd')
+with open("config.json", "w") as f:
+    try:
+        data = json.load(f)
+    except:
+        data = {}
+    data["ssid"] = ssid
+    data["passwd"] = passwd
+    json.dump(data, f)

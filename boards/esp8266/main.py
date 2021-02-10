@@ -12,11 +12,11 @@ import network
 ssid = 'ESP32-AP-WebServer'
 password = '123456789'
 
-ap = network.WLAN(network.STA_IF)
-ap.active(True)
-while not ap.active():
+sta = network.WLAN(network.STA_IF)
+sta.active(True)
+while not sta.active():
     pass
-scan = [net[0] for net in ap.scan()]
+scan = [net[0] for net in sta.scan()]
 ap = network.WLAN(network.AP_IF)
 ap.active(True)
 ap.config(essid=ssid, password=password)
@@ -25,7 +25,8 @@ while not ap.active():
 print('network config:', ap.ifconfig())
 scanstr = "<select id=\"ssid\" name=\"ssid\">"
 for ssid in scan:
-    scanstr = scanstr + "<option value= \"" + str(ssid).strip('b').strip('\'') + "\">" + str(ssid).strip('b').strip('\'') + "</option>"
+    ssid = str(ssid).strip('b').strip('\'').strip("\"")
+    scanstr = scanstr + "<option value= \"" + ssid + "\">" + ssid + "</option>"
 scanstr = scanstr + "</select>"
 
 
@@ -59,10 +60,11 @@ def web_page():
         </head>
         <body>
            <center><h2>Welcome to your Air Quality Cluster!</h2></center>
+           <center><h2>Please Select a SSID and enter a password to connect to a network!</h2></center>
            <center>
              <form>
                 """ + scanstr + """
-               <input id= 'pass' type='text' name="pass">
+               <input id='pass' type='text' name="pass" placeholder="pass">
                <input type="submit" value="Submit">
              </form>
            </center>
@@ -75,27 +77,38 @@ print('serving')
 while True:
     # Socket accept()
     conn, addr = s.accept()
-    print("Got connection from %s" % str(addr))
+    # print("Got connection from %s" % str(addr))
 
     # Socket receive()
     request=conn.recv(1024)
-    print("")
-    print("")
-    print("Content %s" % str(request))
+    # print("Content %s" % str(request))
+    ssid = None
+    passwd = None
+    request = str(request, 'utf8')
+    if "GET /?ssid=" in request:
+        print('ssid request time')
+        try:
+            ssid = re.search(r"ssid=(.*?)\&", request).group(1).strip()
+            passwd = re.search(r"pass=(.*?)\ HTTP", request).group(1).strip()
+            if ssid and passwd:
+                print("ssid:", ssid)
+                print("pass:", passwd)
+                sta.connect(str(ssid), str(passwd))
+                counter = 0
+                while not sta.isconnected():
+                    time.sleep(1)
+                    counter += 1
+                    if counter > 5:
+                        continue
+                print("connected! " + str(sta.ifconfig()))
+                ap.active(False)
+                break
+        except Exception as e:
+            print(e)
+    # GET /?ssid=MlgWifi&pass=xXGitGudXx HTTP
+    # /?ssid=MlgWifi&pass=xXGitGudXx
 
     # Socket send()
-    request = str(request)
-    print(request)
-    led_on = request.find('/?LED=1')
-    led_off = request.find('/?LED=0')
-    if led_on == 6:
-        print('LED ON')
-        print(str(led_on))
-        led.value(1)
-    elif led_off == 6:
-        print('LED OFF')
-        print(str(led_off))
-        led.value(0)
     response = web_page()
     conn.send('HTTP/1.1 200 OK\n')
     conn.send('Content-Type: text/html\n')

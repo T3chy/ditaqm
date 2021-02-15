@@ -2,20 +2,21 @@ import machine
 import time
 import re
 import json
+import socket
 
 
 # ************************
 # Configure the ESP32 wifi
 # as Access Point mode.
 import network
-ssid = 'ESP32-AP-WebServer'
-passwd = '123456789'
 
 sta = network.WLAN(network.STA_IF)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sta.active(False)
 sta.active(True)
 while not sta.active():
     pass
-print('network config:', ap.ifconfig())
+print('network config:', sta.ifconfig())
 
 
 # ************************
@@ -41,7 +42,7 @@ host = "NA"
 uname = "NA"
 sname = "NA"
 
-def main():
+def main_page():
     if hostentered:
         hosttext = """<b> done! your host: """ + host + """</b>"""
     else:
@@ -151,7 +152,7 @@ if not flag:
 while True:
     conn, addr = s.accept()
     request=conn.recv(1024)
-    response = web_page()
+    response = main_page()
     conn.send('HTTP/1.1 200 OK\n')
     conn.send('Content-Type: text/html\n')
     conn.send('Connection: close\n\n')

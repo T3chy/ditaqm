@@ -8,7 +8,7 @@ import json
 # Configure the ESP32 wifi
 # as Access Point mode.
 import network
-ssid = 'ESP32-AP-WebServer'
+ssid = 'Your Air Quality Cluster!'
 passwd = '123456789'
 
 sta = network.WLAN(network.STA_IF)
@@ -77,7 +77,6 @@ def success():
         </html>"""
     return html_page
 
-print('serving')
 flag = 0
 try:
     with open("config.json", "r") as f:
@@ -98,6 +97,7 @@ except:
     pass
 
 if not flag:
+    print('serving')
     while True:
         conn, addr = s.accept()
         request=conn.recv(1024)
@@ -140,14 +140,15 @@ if not flag:
         conn.send('Connection: close\n\n')
         conn.sendall(response)
         conn.close()
+    with open("config.json", "w") as f:
+        try:
+            data = json.load(f)
+        except:
+            data = {}
+        data["ssid"] = ssid
+        data["passwd"] = passwd
+        json.dump(data, f)
 else:
     ap.active(False)
     print('alreadfy conncetd')
-with open("config.json", "w") as f:
-    try:
-        data = json.load(f)
-    except:
-        data = {}
-    data["ssid"] = ssid
-    data["passwd"] = passwd
-    json.dump(data, f)
+s.close()

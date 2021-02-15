@@ -25,7 +25,7 @@ REDUCTION_R0 = 160. # kΩ
 
 PWM_GPIO = 4 # physical port 7
 
-try: # TODO maybe the sensor bit vals should be int()ed
+try:
     # initalize sensors, host, name from config file
     with open("config.json", "r") as f:
         CONFIG = json.loads(f)

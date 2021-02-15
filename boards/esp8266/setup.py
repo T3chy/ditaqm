@@ -88,6 +88,8 @@ def loginpage():
                    </form><br><br>
                    <a href="/"> return to home </a>
                    </h2></center>
+                </body>
+                </html>
             """
 
         else:
@@ -121,6 +123,7 @@ def loginpage():
             </html>"""
     return html_page
 def enterhostpage():
+    pass
 
 
 print('serving')

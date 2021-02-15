@@ -1,5 +1,6 @@
 #!/bin/bash
 # copyleft me (Elam) 2021; keep the software free, baby
+# TODO check if a config file already exists
 if [ "$(id -u)" != "0" ]; then
 	echo "You must be the superuser to run this script :( try adding \"sudo\" at the begining of your command and rerun" >&2
 	exit 1
@@ -9,42 +10,54 @@ error() { clear; printf "ERROR:\\n%s\\n" "$1" >&2; exit 1;}
 
 pullDeps(){ #TODO try to not run this after reboot
 
-	apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
 	# git, cuz duh
 	apt-get install -y git
 
-	[ -d diyaqi ] || git clone https://github.com/t3chy/diyaqi
-	cd diyaqi || error "can't enter source directory. Git clone probably failed"
+	# try to not repull deps
+	[ -d diyaqi/boards/raspi ] || git clone https://github.com/t3chy/diyaqi
+	cd diyaqi/boards/raspi || error "can't enter source directory. Git clone probably failed"
+	if ! [ -f ran ]; then {
+		touch ran
 
-	# python, for obvious reasons
-	apt-get install -y python3 python3-pip || error "Couldn't install python"
-	pip3 install --upgrade setuptools
+		apt-get update || error "apt-get update failed! Is your package cache corrupted? see troubleshooting"
 
-	#make python3 default
-	update-alternatives --install /usr/bin/python python "$(which python2)" 1
-	update-alternatives --install /usr/bin/python python "$(which python3)" 2
 
-	# cURL to test website continuity and name uniqueness
+		# python, for obvious reasons
+		apt-get install -y python3 python3-pip || error "Couldn't install python"
+		pip3 install --upgrade setuptools
 
-	apt-get install -y curl
+		#make python3 default
+		update-alternatives --install /usr/bin/python python "$(which python2)" 1
+		update-alternatives --install /usr/bin/python python "$(which python3)" 2
 
-	# i2ctools to detect device
+		# cURL to test website continuity and name uniqueness
 
-	apt-get install -y i2c-tools
+		apt-get install -y curl
 
-	# # sensor / boardio deps
+		# i2ctools to detect device
 
-	# i2c stuff
-	pip3 install RPI.GPIO || exit 1
-	pip3 install adafruit-blinka
-	pip3 install adafruit-circuitpython-bme280
-	pip3 install adafruit-circuitpython-ads1x15
-	pip3 install pigpio
+		apt-get install -y i2c-tools
 
-	# pwm for the mhz19b
-	apt-get install -y pigpio python-pigpio python3-pigpio
-	sudo systemctl enable pigpiod || error "failed to enable pigpiod!"
-	sudo systemctl start pigpiod || error "failed to start pipgpiod!"
+		# jq for json-based config file
+		apt-get install -y jq
+
+		# i2c stuff
+		pip3 install RPI.GPIO || exit 1
+		pip3 install adafruit-blinka
+		pip3 install adafruit-circuitpython-bme280
+		pip3 install adafruit-circuitpython-ads1x15
+		pip3 install pigpio
+
+		# pwm for the mhz19b
+		apt-get install -y pigpio python-pigpio python3-pigpio
+		sudo systemctl enable pigpiod || error "failed to enable pigpiod!"
+		sudo systemctl start pigpiod || error "failed to start pipgpiod!"
+	}
+	# else { maybe this should be used
+	# 	rm ran
+	# }
+	fi
+
 
 }
 
@@ -99,6 +112,16 @@ post_test(){
 	fi
 }
 
+# login / registration stuff
+checkLogin(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/login" | jq -r '.code'
+}
+regUser(){
+	curl -s -d "username=$1" -d "password=$2" -X POST "$host/api/register" | jq -r '.code'
+}
+regSens(){
+	curl -s -d "username=$1" -d "password=$2" -d "sensorname=$3" -X POST "$host/api/register" | jq -r '.code'
+}
 
 
 cd /home/pi || error "cd failed ???"
@@ -154,18 +177,20 @@ echo "Looking for BME280 Sensor..."
 bme="$(test_bme)"
 if [ "$bme" == 0 ]; then
 	echo "BME sensor found!"
+	bme=1
 else
 	echo "no BME sensor found :("
-	bme=1
+	bme=0
 fi
 
 echo "Looking for CHMCU-6814 Sensor..."
 cjmcu="$(test_cjmcu)"
 if [ "$cjmcu" == 0 ]; then
 	echo "CHMCU-6814 sensor found!"
+	cjmcu=1
 else
 	echo "CHMCU-6814 no sensor found :("
-	cjmcu=1
+	cjmcu=0
 fi
 
 
@@ -173,9 +198,10 @@ echo "Looking for CHMCU-6814 Sensor..."
 mhz19b="$(test_mhz19b)"
 if [ "$mhz19b" == 0 ]; then
 	echo "mhz19b sensor found!"
+	mhz19b=1
 else
 	echo "no mhz19b sensor found :("
-	mhz19b=1
+	mhz19b=0
 fi
 
 
@@ -198,15 +224,90 @@ while [ $flag -eq 1 ]; do
 		else
 			echo "host is not up :( retry? [y/N]"
 			read -r flag
-			if [ "$flag" == "y" ]; then
-				flag=0
-			else
+			if ! [ "$flag" == "y" ]; then
 				echo "exiting..."
-				exit 1
 			fi
 		fi
 	fi
 done
+
+flag="n"
+echo "Do you have a login? If not, we will create one shortly [y/N]"
+read -r flag
+
+
+code=1
+if [ "$flag" == "y" ]; then
+	while ! [ $code == 200 ]; do
+		echo "What's your username?"
+		read -r user
+		echo "What's your password?"
+		read -r pass
+		code=$(checkLogin "$user" "$pass")
+		if [ "$code" == 200 ]; then
+			echo "login successful! Proceeding..."
+		fi
+		if [ "$code" == 400 ]; then
+			echo "Please enter both a username and password!"
+		fi
+		if [ "$code" == 204 ]; then
+			echo "Username and password do not match :("
+		fi
+		if [ "$code" == 206 ]; then
+			echo "This username does not exist! Would you like to create an account with this username? [Y/n]"
+			read -r cflag
+			if ! [ "$cflag" == n ]; then
+				flag="n"
+				break
+			fi
+		fi
+	done
+fi
+code=1
+if ! [ "$flag" == "y" ]; then
+	while ! [ $code == 200 ]; do
+
+		echo "let's make you an account!"
+		flag=1
+		if [ -n "$user" ]; then
+			flag=0
+		fi
+		while [ $flag -eq 1 ]; do
+			echo "what do you want your username to be?"
+			read -r user
+			echo "you entered $user\. is that correct? [Y/n]"
+			read -r flag
+			if ! [ "$flag" == "n" ]; then
+				flag=0
+			else
+				flag=1
+			fi
+		done
+		echo "Welcome, $user\!"
+		while [ $flag -eq 1 ]; do
+			echo "Please enter a password"
+			read -r pass
+			echo "you entered $pass\. is that correct? [Y/n]"
+			read -r flag
+			if ! [ "$flag" == "n" ]; then
+				flag=0
+			else
+				flag=1
+			fi
+		done
+		echo "attempting to register user..."
+		code=$(regUser user pass)
+		if [ "$code" == 200 ]; then
+			echo "Registration successful! Proceeding..."
+		fi
+		if [ "$code" == 206 ]; then
+			echo "user already exists :( please choose a unique username"
+		fi
+		if [ "$code" == 400 ]; then
+			echo "an unknown error occured :( super bummer"
+		fi
+	done
+fi
 
 flag=1
 while ! [ $flag -eq 0 ]; do
@@ -220,13 +321,14 @@ while ! [ $flag -eq 0 ]; do
 		else
 			flag=1
 		fi
-
 		if ! [ "$flag" -eq 0 ]; then
 			echo "checking uniqueness..."
 			flag=$(checkUnique "$name")
-
 			if [ "$flag" -eq 0 ]; then
-				echo "Your sensor name is unique! Proceeding..."
+				echo "Your sensor name is unique!"
+				echo "Registering sensor..."
+				code=$(regSens user pass name)
+
 			else
 				echo "Someone already snagged that name :( please try a different one"
 			fi
@@ -238,7 +340,10 @@ while ! [ $flag -eq 0 ]; do
 	fi
 done
 
-printf "%s\n%s\n%d\n%d\n%d\n" "$host" "$name" "$bme" "$cjmcu" "$mhz19b" > config
+echo "saving configuration..."
+
+jq -n '{"host":'\""$host\""', "sensorname":'\""$name"\"', "username":'\""$user"\"', "password":'\""$pass"\"', "BME":'\""$bme"\"', "CJMCU":'\""$cjmcu"\"', "MHZ19B":'\""$mhz19b"\"'}' > config.json
+
 
 echo "configuration stored!"
 
@@ -248,7 +353,7 @@ try=$(post_test)
 if [ "$try" -eq 0 ]; then
 	echo "success! enabling automatic restart on boot"
 else
-	echo "failure, see error trace below :( exiting...."
+	echo "failure, see error trace above :( exiting...."
 	echo "$try"
 	exit 1
 fi

@@ -4,6 +4,8 @@ def do_connect():
     """Connect to a wifi network"""
     import network
     sta_if = network.WLAN(network.STA_IF)
+    SSID = "MlgWifi"
+    PASS = "xXGitGudXx"
     if not sta_if.isconnected():
         print('connecting to network...')
         sta_if.active(True)

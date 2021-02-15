@@ -1,6 +1,7 @@
 # Copyleft Elam Day-Friedland 2021
 
 # see https://cdn-shop.adafruit.com/datasheets/ads1115.pdf
+# https://www.youtube.com/watch?v=4jcxeJxvi3Y
 from machine import Pin, I2C
 import time
 i2c = I2C(scl=Pin(5), sda=Pin(4))
@@ -51,5 +52,11 @@ class ADS1115:
             """Gonna need to left shift first byte 8 bits left to stitch the values together""" #TODO do that
             reading = 0
             voltages[i] = reading * voltageConv
+    def test(self):
+        # self.i2c.write(bytes([0b1001000, 0b00000001, 0b11000101, 0b11100011]))
+        self.i2c.writeto(ADS_ADDR, bytes([0b00000001, 0b11000101, 0b11100011]))
+        time.sleep(.0013)
+        self.i2c.writeto(ADS_ADDR, bytes([0b00000000]))
+        print(self.i2c.readfrom(ADS_ADDR,2))
     def write(self):
         pass # TODO write this lmao

@@ -1,24 +1,50 @@
 import machine
+from machine import Pin, I2C
 import time
 import re
 import json
+import ssd1306
+
+try:
+    i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4)) # this(-1) may not work on ESP32
+    oled = ssd1306.SSD1306_I2C(128, 32, i2c)
+    is_oled = True
+    oled.fill(0)
+    oled.text("booting",0,0)
+    oled.show()
+except Exception as e:
+    print(e)
+    is_oled = False
 
 
+def say(msg, snd=0): # maybe useful if it can handle multiple lines (array input?)
+    if is_oled:
+        oled.fill(0)
+        oled.text(str(msg), 0,0)
+        if snd:
+            oled.text(str(snd), 0, 10)
+        oled.show()
+    print(msg)
+    print(snd if snd else "")
 # ************************
 # Configure the ESP32 wifi
 # as Access Point mode.
 import network
-ssid = 'Your Air Quality Cluster!'
-passwd = '123456789'
+ap_ssid = 'Your Air Quality Cluster!'
+ap_passwd = '12345678'
 
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
+say("enabling STA..")
 while not sta.active():
     pass
+say("scanning SSIDs...")
 scan = [net[0] for net in sta.scan()]
+
+say("enabling AP...")
 ap = network.WLAN(network.AP_IF)
 ap.active(True)
-ap.config(essid=ssid, password=passwd)
+ap.config(essid=ap_ssid, password=ap_passwd)
 while not ap.active():
     pass
 print('network config:', ap.ifconfig())
@@ -27,6 +53,12 @@ for ssid in scan:
     ssid = str(ssid).strip('b').strip('\'').strip("\"")
     scanstr = scanstr + "<option value= \"" + ssid + "\">" + ssid + "</option>"
 scanstr = scanstr + "</select>"
+say("AP Enabled!")
+time.sleep(1)
+say("SSID:" + ap_ssid, snd="pass:" + ap_passwd)
+time.sleep(5)
+
+
 
 
 # ************************
@@ -99,6 +131,7 @@ except:
 if not flag:
     print('serving')
     while True:
+        say("Navigate to:", snd="http://" + str(ap.ifconfig()))
         conn, addr = s.accept()
         request=conn.recv(1024)
         # print("Content %s" % str(request))
@@ -148,7 +181,8 @@ if not flag:
         data["ssid"] = ssid
         data["passwd"] = passwd
         json.dump(data, f)
+        say("Config stored,", snd="connected to WLAN!")
 else:
     ap.active(False)
-    print('alreadfy conncetd')
+    say("connected to WLAN!")
 s.close()

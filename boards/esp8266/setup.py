@@ -1,4 +1,5 @@
 import machine
+from machine import Pin, I2C
 import time
 import re
 import json
@@ -42,6 +43,23 @@ host = "NA"
 uname = "NA"
 sname = "NA"
 
+POST_HEADERS = """\
+POST /in HTTP/1.1\r
+Content-Type: {content_type}\r
+Content-Length: {content_length}\r
+Host: {host}\r
+Connection: close\r
+\r\n"""
+
+def check_host(host):
+        body = dict_to_body(update())
+        body_bytes = body.encode('ascii')
+        header_bytes = HEADERS.format(
+        content_type="application/x-www-form-urlencoded",
+        content_length=len(body_bytes),
+        host=str(HOST) + ":" + str(PORT)
+    ).encode('iso-8859-1')
+
 def main_page():
     if hostentered:
         hosttext = """<b> done! your host: """ + host + """</b>"""
@@ -72,7 +90,7 @@ def main_page():
            </body>
         </html>"""
     return html_page
-def loginpage():
+def login_page():
     if hostentered:
         if loggedin:
             html_page = """<!DOCTYPE HTML>
@@ -123,7 +141,7 @@ def loginpage():
            <a href="/"> return to home </a>
             </html>"""
     return html_page
-def enterhostpage():
+def host_page():
     pass
 
 
@@ -152,7 +170,14 @@ if not flag:
 while True:
     conn, addr = s.accept()
     request=conn.recv(1024)
-    response = main_page()
+    print(request)
+    request = str(request, 'utf8')
+    wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip().lower()
+    if wanted == "login":
+        response = login_page()
+    else:
+        response = main_page()
+
     conn.send('HTTP/1.1 200 OK\n')
     conn.send('Content-Type: text/html\n')
     conn.send('Connection: close\n\n')

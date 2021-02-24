@@ -2,7 +2,7 @@
 <export version="D">
   <design>
     <source>/home/elamd/projects/aqic/diyaqi/boards/esp32/smbpcb/smbpcb.kicad_sch</source>
-    <date>Sat 20 Feb 2021 02:40:40 PM PST</date>
+    <date>Mon 22 Feb 2021 02:41:17 PM PST</date>
     <tool>Eeschema (5.99.0-8928-gc255dede17)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -1605,7 +1605,7 @@
       <node ref="R14" pin="2" pintype="passive"/>
       <node ref="R19" pin="2" pintype="passive"/>
       <node ref="R20" pin="2" pintype="passive"/>
-      <node ref="R25" pin="2" pintype="passive"/>
+      <node ref="R25" pin="1" pintype="passive"/>
       <node ref="U2" pin="10" pinfunction="FB" pintype="input"/>
       <node ref="U2" pin="2" pinfunction="VOUT" pintype="power_out"/>
       <node ref="U7" pin="3" pinfunction="VI" pintype="power_in"/>
@@ -1662,6 +1662,7 @@
       <node ref="C4" pin="2" pintype="passive"/>
       <node ref="C5" pin="2" pintype="passive"/>
       <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="D3" pin="1" pinfunction="K" pintype="passive"/>
       <node ref="EXT_BATT1" pin="2" pinfunction="Pin_2" pintype="passive"/>
       <node ref="J1" pin="4" pinfunction="ID" pintype="passive"/>
       <node ref="J1" pin="5" pinfunction="GND" pintype="power_out"/>
@@ -1739,7 +1740,6 @@
     <net code="20" name="Net-(C5-Pad1)">
       <node ref="C5" pin="1" pintype="passive"/>
       <node ref="D1" pin="1" pinfunction="K" pintype="passive"/>
-      <node ref="D3" pin="1" pinfunction="K" pintype="passive"/>
     </net>
     <net code="21" name="Net-(C6-Pad1)">
       <node ref="C6" pin="1" pintype="passive"/>
@@ -1777,7 +1777,7 @@
     </net>
     <net code="29" name="Net-(D3-Pad2)">
       <node ref="D3" pin="2" pinfunction="A" pintype="passive"/>
-      <node ref="R25" pin="1" pintype="passive"/>
+      <node ref="R25" pin="2" pintype="passive"/>
     </net>
     <net code="30" name="Net-(D4-Pad1)">
       <node ref="D4" pin="1" pinfunction="K" pintype="passive"/>

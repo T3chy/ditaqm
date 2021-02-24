@@ -5784,7 +5784,7 @@
     (uuid 1f43e278-2549-4f3e-b9ae-cade2ad4d2f1)
     (property "Reference" "J1" (id 0) (at 18.415 47.625 0))
     (property "Value" "USB_B_Micro" (id 1) (at 25.4 47.625 0))
-    (property "Footprint" "Connector_USB:USB_Micro-B_GCT_USB3076-30-A" (id 2) (at 27.305 58.42 0)
+    (property "Footprint" "Connector_USB:USB_Micro-B_Molex-105017-0001" (id 2) (at 27.305 58.42 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 27.305 58.42 0)
@@ -6260,7 +6260,7 @@
       (reference "IC1") (unit 1) (value "MiCS-6814") (footprint "mics:SENSOR_MICS-6814")
     )
     (path "/1f43e278-2549-4f3e-b9ae-cade2ad4d2f1"
-      (reference "J1") (unit 1) (value "USB_B_Micro") (footprint "Connector_USB:USB_Micro-B_GCT_USB3076-30-A")
+      (reference "J1") (unit 1) (value "USB_B_Micro") (footprint "Connector_USB:USB_Micro-B_Molex-105017-0001")
     )
     (path "/b0e046e6-ec2b-40de-9094-a14033950a59"
       (reference "J2") (unit 1) (value "PMS7003") (footprint "mics:PMS7003")

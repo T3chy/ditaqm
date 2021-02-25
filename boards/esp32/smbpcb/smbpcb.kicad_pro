@@ -33,9 +33,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 3.2,
-          "height": 5.7,
-          "width": 5.7
+          "drill": 0.0,
+          "height": 1.45,
+          "width": 1.0
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -377,7 +377,6 @@
         "microvia_drill": 0.1,
         "name": "lower impedence",
         "nets": [
-          "+3V3",
           "+5V",
           "CO",
           "ESP_RX0",
@@ -446,7 +445,7 @@
   },
   "sheets": [
     [
-      "bc90e52f-e1c2-42de-9f54-eb06543ccc04",
+      "37f9b1c7-eecc-43f2-85ab-aaade9f411c0",
       ""
     ]
   ],

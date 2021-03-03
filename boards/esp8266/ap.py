@@ -30,33 +30,12 @@ def say(msg, snd=0): # maybe useful if it can handle multiple lines (array input
 # Configure the ESP32 wifi
 # as Access Point mode.
 import network
-ap_ssid = 'Your Air Quality Cluster!'
-ap_passwd = '12345678'
 
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
 say("enabling STA..")
 while not sta.active():
     pass
-say("scanning SSIDs...")
-scan = [net[0] for net in sta.scan()]
-
-say("enabling AP...")
-ap = network.WLAN(network.AP_IF)
-ap.active(True)
-ap.config(essid=ap_ssid, password=ap_passwd)
-while not ap.active():
-    pass
-print('network config:', ap.ifconfig())
-scanstr = "<select id=\"ssid\" name=\"ssid\">"
-for ssid in scan:
-    ssid = str(ssid).strip('b').strip('\'').strip("\"")
-    scanstr = scanstr + "<option value= \"" + ssid + "\">" + ssid + "</option>"
-scanstr = scanstr + "</select>"
-say("AP Enabled!")
-time.sleep(1)
-say("SSID:" + ap_ssid, snd="pass:" + ap_passwd)
-time.sleep(5)
 
 
 
@@ -66,16 +45,10 @@ time.sleep(5)
 # over TCP/IP
 import socket
 
-# AF_INET - use Internet Protocol v4 addresses
-# SOCK_STREAM means that it is a TCP socket.
-# SOCK_DGRAM means that it is a UDP socket.
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('',80)) # specifies that the socket is reachable by any address the machine happens to have
-s.listen(5)     # max of 5 socket connections
 
 # ************************
-# Function for creating the
-# web page to be displayed
+# Functions for creating the
+# web pages to be displayed
 def web_page():
     html_page = """<!DOCTYPE HTML>
         <html>
@@ -102,7 +75,7 @@ def success():
           <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body>
-           <center><h2>success! Connect (on the device you want to access the cluster from) to the wifi network you just entered the credentials for, and follow the instructions on the OLED!</h2></center>
+           <center><h2>Success! the device will now reboot. Connect (on the device you want to access the cluster from) to the wifi network you just entered the credentials for, and follow the instructions on the OLED!</h2></center>
            <center>
            </center>
            </body>
@@ -110,6 +83,17 @@ def success():
     return html_page
 
 flag = 0
+def finish(conn):
+    print("connected! " + str(sta.ifconfig()))
+    response = success()
+    conn.send('HTTP/1.1 200 OK\n')
+    conn.send('Content-Type: text/html\n')
+    conn.send('Connection: close\n\n')
+    conn.sendall(response)
+    conn.close()
+    time.sleep(1)
+    ap.active(False)
+
 try:
     with open("config.json", "r") as f:
         try:
@@ -120,7 +104,7 @@ try:
                 time.sleep(1)
                 counter += 1
                 if counter > 5:
-                    continue
+                    break
             if sta.isconnected():
                 flag = 1
         except Exception as e:
@@ -129,15 +113,45 @@ except:
     pass
 
 if not flag:
+    ap_ssid = 'Your Air Quality Cluster!'
+    ap_passwd = '12345678'
+    say("scanning SSIDs...")
+    scan = [net[0] for net in sta.scan()]
+
+    say("enabling AP...")
+    ap = network.WLAN(network.AP_IF)
+    ap.active(True)
+    ap.config(essid=ap_ssid, password=ap_passwd)
+    while not ap.active():
+        pass
+    print('network config:', ap.ifconfig())
+    scanstr = "<select id=\"ssid\" name=\"ssid\">"
+    for ssid in scan:
+        ssid = str(ssid).strip('b').strip('\'').strip("\"")
+        scanstr = scanstr + "<option value= \"" + ssid + "\">" + ssid + "</option>"
+    scanstr = scanstr + "</select>"
+    say("AP Enabled!")
+    time.sleep(1)
+    say("SSID:" + ap_ssid, snd="pass:" + ap_passwd)
+    time.sleep(5)
+    # AF_INET - use Internet Protocol v4 addresses
+    # SOCK_STREAM means that it is a TCP socket.
+    # SOCK_DGRAM means that it is a UDP socket.
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('',80)) # specifies that the socket is reachable by any address the machine happens to have
+    s.listen(5)     # max of 5 socket connections
     print('serving')
     while True:
-        say("Navigate to:", snd="http://" + str(ap.ifconfig()))
+        say("http://" + str(ap.ifconfig()[0]))
         conn, addr = s.accept()
         request=conn.recv(1024)
         # print("Content %s" % str(request))
         ssid = None
         passwd = None
         request = str(request, 'utf8')
+        if sta.isconnected():
+            finish(conn)
+            break
         if "GET /?ssid=" in request:
             print('ssid request time')
             try:
@@ -152,16 +166,8 @@ if not flag:
                         time.sleep(1)
                         counter += 1
                         if counter > 5:
-                            continue
-                    print("connected! " + str(sta.ifconfig()))
-                    response = success()
-                    conn.send('HTTP/1.1 200 OK\n')
-                    conn.send('Content-Type: text/html\n')
-                    conn.send('Connection: close\n\n')
-                    conn.sendall(response)
-                    conn.close()
-                    time.sleep(1)
-                    ap.active(False)
+                            break
+                    finish(conn)
                     break
             except Exception as e:
                 print(e)
@@ -182,7 +188,6 @@ if not flag:
         data["passwd"] = passwd
         json.dump(data, f)
         say("Config stored,", snd="connected to WLAN!")
+        machine.reset()
 else:
-    ap.active(False)
     say("connected to WLAN!")
-s.close()

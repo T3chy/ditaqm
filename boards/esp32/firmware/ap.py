@@ -4,6 +4,7 @@ import time
 import re
 import json
 import ssd1306
+import os
 
 try:
     i2c = machine.I2C(-1, machine.Pin(5), machine.Pin(4)) # this(-1) may not work on ESP32
@@ -97,6 +98,7 @@ def finish(conn):
 try:
     with open("config.json", "r") as f:
         try:
+            f.seek(0) # maybe this is unnecessary
             data = json.load(f)
             sta.connect(str(data["ssid"]), str(data["passwd"]))
             counter = 0
@@ -173,21 +175,24 @@ if not flag:
                 print(e)
 
         # Socket send()
-        response = web_page()
-        conn.send('HTTP/1.1 200 OK\n')
-        conn.send('Content-Type: text/html\n')
-        conn.send('Connection: close\n\n')
-        conn.sendall(response)
-        conn.close()
+        try: # we sometimes this fails when the user closes web browser prematurely
+            response = web_page()
+            conn.send('HTTP/1.1 200 OK\n')
+            conn.send('Content-Type: text/html\n')
+            conn.send('Connection: close\n\n')
+            conn.sendall(response)
+            conn.close()
+        except Exception as e:
+            print("sending response failed!")
+            print(e)
+            pass
     with open("config.json", "w") as f:
-        try:
-            data = json.load(f)
-        except:
-            data = {}
+        data = {}
         data["ssid"] = ssid
         data["passwd"] = passwd
         json.dump(data, f)
         say("Config stored,", snd="connected to WLAN!")
-        machine.reset()
+    machine.reset()
+
 else:
     say("connected to WLAN!")

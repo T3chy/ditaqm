@@ -36,13 +36,6 @@ s.listen(5)     # max of 5 socket connections
 # ************************
 # Function for creating the
 # web page to be displayed
-hostentered = False
-loggedin = False
-sensnamed = False
-
-HOST= "NA"
-UNAME = "NA"
-SNAME = "NA"
 
 dns_addr = socket.getaddrinfo("127.0.0.1", 53)[0][-1]
 
@@ -54,6 +47,36 @@ Host: {host}\r
 Connection: close\r
 \r\n"""
 
+
+def print_config():
+    with open("config.json", "r") as f:
+        print("printing config")
+        for line in f:
+            print(line)
+        print('done printing config')
+        f.seek(0)
+
+def reset_settings():
+    print("resetting setings")
+    print_config()
+    hostentered = False
+    loggedin = False
+    sensnamed = False
+
+    HOST= "NA"
+    UNAME = "NA"
+    SNAME = "NA"
+    with open('config.json', 'r') as f:
+        content = json.load(f)
+    with open('config.json', 'w') as f: # erase file , truncate doesn't seem to work
+        content.pop('host', None)
+        content.pop('sensname', None)
+        content.pop('username', None)
+        content.pop('password', None)
+        f.seek(0)
+        json.dump(content,f)
+    print('settings reset')
+    print_config()
 
 
 def dict_to_body(data):
@@ -113,6 +136,7 @@ def main_page():
                    <li> (optional) Login / Register an Account: : """ + logintext + """ </li>
                    <li> Name your sensor: """ + nametext + """ </li>
                </ol>
+               <a href="/reset"> reset settings </a>
            </center>
            </body>
         </html>"""
@@ -276,7 +300,16 @@ if not flag:
     machine.reset()
 
 while True:
+    print_config()
+    hostentered = False
+    loggedin = False
+    sensnamed = False
+
+    HOST= "NA"
+    UNAME = "NA"
+    SNAME = "NA"
     with open("config.json", "r") as f:
+        f.seek(0)
         data = json.load(f)
         if "host" in data:
             hostentered = True
@@ -298,14 +331,16 @@ while True:
             wanted = wanted.split("?")
             for i in range(1, len(wanted)):
                 tmp = wanted[i].split("=")
-                if not "http://" in tmp[1] and not "https://" in tmp[1]:
+                if not "http://" in tmp[1] and not "https://" in tmp[1] and "host" == wanted[0]:
                     tmp[1] = "http://" + tmp[1]
                 args[tmp[0]] =  tmp[1] # probably functionize this
             wanted = wanted[0]
+        response = main_page()
         if wanted == "login":
             response = login_page()
         elif wanted == "host":
             print(wanted)
+            print("args: " + str(args))
             if "host" in args:
                 print(args['host'])
                 try:
@@ -328,41 +363,41 @@ while True:
                     response = host_page(retry=True)
             else:
                 response = host_page(retry=False)
+        elif wanted == "reset":
+            reset_settings()
         elif wanted == "namesens":
-            if "sensname" in args:
+            if not hostentered:
+                response = main_page()
+            elif "sensname" in args:
                 print(args['sensname'])
                 try:
-                    # resp = requests.get(str(HOST + "/api/checkUnique")).text
-                    uname = json.dumps({"name":args['sensname']})
-                    resp = requests.post(str(HOST + "/checkUnique"), data=uname).text # TODO OUTDATED USING ON LIVE SITE FOR TESTING
+                    uname = json.dumps({"sensorname":args['sensname']})
+                    print("host is: " + str(HOST))
+                    resp = requests.post(str(HOST + "/api/checkUnique"), data=uname).text
+                    print(resp)
                 except Exception as e:
                     print(e)
-                    print(resp)
                     resp = 0
                 if resp == "OK":
-                    hostentered = sensnamed
-                    SNAME = args["sensname"]
-                    response = main_page()
-                try:
-                    # resp = requests.get(str(HOST + "/api/regSens")).text
-                    uname = json.dumps({"name":args['sensname']})
-                    resp = requests.post(str(HOST + "/regSens"), data=uname).text # TODO OUTDATED USING ON LIVE SITE FOR TESTING
-                except Exception as e:
-                    print(e)
-                    print(resp)
-                    with open('config.json', 'r+') as f:
-                        content = json.load(f)
-                        content["sensname"] = args["sensname"]
-                        f.seek(0)
-                        json.dump(content,f)
-                        print("sensor name added to configuration!")
+                    try:
+                        uname = json.dumps({"name":args['sensname']})
+                        resp = requests.get(str(HOST + "/api/regSens")).text
+                        with open('config.json', 'r+') as f:
+                            content = json.load(f)
+                            content["sensname"] = args["sensname"]
+                            f.seek(0)
+                            json.dump(content,f)
+                            print("sensor name added to configuration!")
+                        sensnamed = True
+                        SNAME = args["sensname"]
+                        response = main_page()
+                    except Exception as e:
+                        print(e)
+                        print(resp)
                 else:
                     response = sensname_page(retry=True)
             else:
                 response = sensname_page(retry=False)
-
-        else:
-            response = main_page()
 
         conn.send('HTTP/1.1 200 OK\n')
         conn.send('Content-Type: text/html\n')

@@ -1,0 +1,2 @@
+go to ~/.local/micropython/ports/esp32 run make erase and make deploy
+symlink new modules in .../ports/esp32/modules

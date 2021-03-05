@@ -1,21 +1,26 @@
 """Various HTML web pages used by firmware throughought setup and use"""
-def choose_ssid(scanstr):
+def choose_ssid(scanstr, retry=False):
     """The default page for the setup Access Point, takes list of ssids"""
+    if retry:
+        retry_string = "<h2>That didn't work :( please check your credentials and retry"
+    else:
+        retry_string = ""
     html_page = """<!DOCTYPE HTML>
         <html>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
-        <body>
-           <center><h2>Welcome to your Air Quality Cluster!</h2></center>
-           <center><h2>Please Select a SSID and enter a password to connect to a network!</h2></center>
-           <center>
-             <form>
-                """ + scanstr + """
-               <input id='pass' type='text' name="pass" placeholder="pass">
-               <input type="submit" value="Submit">
-             </form>
-           </center>
+            <body>
+               <center>
+                    <h2>Welcome to your Air Quality Cluster!</h2>
+                    <h2>Please Select a SSID and enter a password to connect to a network!</h2>
+                    """ + retry_string + """
+                    <form>
+                        """ + scanstr + """
+                        <input id='pass' type='text' name="pass" placeholder="pass">
+                        <input type="submit" value="Submit">
+                    </form>
+               </center>
            </body>
         </html>"""
     return html_page
@@ -33,7 +38,7 @@ def ssid_connect_success():
            </body>
         </html>"""
     return html_page
-def main_page(HOST=0, UNAME=0, SNAME=0):
+def main_setup_page(HOST=0, UNAME=0, SNAME=0):
     """Homepage for sensor configuration"""
     if HOST:
         hosttext = """<b> done! your host is : """ + HOST + """</b>"""

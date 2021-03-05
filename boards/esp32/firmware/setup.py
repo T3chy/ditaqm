@@ -336,18 +336,17 @@ while True:
                 args[tmp[0]] =  tmp[1] # probably functionize this
             wanted = wanted[0]
         response = main_page()
+        print("args: " + str(args))
         if wanted == "login":
             response = login_page()
         elif wanted == "host":
             print(wanted)
-            print("args: " + str(args))
             if "host" in args:
                 print(args['host'])
                 try:
                     resp = requests.get(str(args["host"] + "/test")).text
                 except Exception as e:
                     print(e)
-                    print(resp)
                     resp = 0
                 if resp == "OK":
                     hostentered = True
@@ -372,16 +371,9 @@ while True:
                 print(args['sensname'])
                 try:
                     uname = json.dumps({"sensorname":args['sensname']})
-                    print("host is: " + str(HOST))
-                    resp = requests.post(str(HOST + "/api/checkUnique"), data=uname).text
-                    print(resp)
-                except Exception as e:
-                    print(e)
-                    resp = 0
-                if resp == "OK":
-                    try:
-                        uname = json.dumps({"name":args['sensname']})
-                        resp = requests.get(str(HOST + "/api/regSens")).text
+                    resp = requests.post(str(HOST + "/api/regSens"), headers = {'content-type': 'application/json'}, data=uname).json()
+                    print("registering sensor reponse: " + str(resp))
+                    if resp["code"] == 200:
                         with open('config.json', 'r+') as f:
                             content = json.load(f)
                             content["sensname"] = args["sensname"]
@@ -391,18 +383,23 @@ while True:
                         sensnamed = True
                         SNAME = args["sensname"]
                         response = main_page()
-                    except Exception as e:
-                        print(e)
-                        print(resp)
-                else:
+                    else:
+                        response = sensname_page(retry=True)
+                except Exception as e:
+                    print("error in registering sensor: ")
+                    print(e)
+                    print(resp)
                     response = sensname_page(retry=True)
             else:
                 response = sensname_page(retry=False)
 
-        conn.send('HTTP/1.1 200 OK\n')
-        conn.send('Content-Type: text/html\n')
-        conn.send('Connection: close\n\n')
-        conn.sendall(response)
-        conn.close()
-    else:
-        pass
+        try:
+            conn.send('HTTP/1.1 200 OK\n')
+            conn.send('Content-Type: text/html\n')
+            conn.send('Connection: close\n\n')
+            conn.sendall(response)
+            conn.close()
+        except: #this is probably bad don't do this
+            pass
+        else:
+            pass

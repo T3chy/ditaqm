@@ -118,6 +118,8 @@ if not flag:
     ap_ssid = 'Your Air Quality Cluster!'
     ap_passwd = '12345678'
     say("scanning SSIDs...")
+    while not sta.active():
+        pass
     scan = [net[0] for net in sta.scan()]
 
     say("enabling AP...")
@@ -144,6 +146,8 @@ if not flag:
     s.listen(5)     # max of 5 socket connections
     print('serving')
     while True:
+        if sta.isconnected():
+            break
         say("http://" + str(ap.ifconfig()[0]))
         conn, addr = s.accept()
         request=conn.recv(1024)

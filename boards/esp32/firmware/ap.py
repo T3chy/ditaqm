@@ -14,7 +14,7 @@ class SetupAp(WebTool):
         """Serve HTTP with connection options, try to connect to WLAN, repeat"""
         conn_succ = False
         while True:
-            conn , dirr, params = super().recieve_request() # wanted dir doesn't matter here
+            conn , _ , params = super().recieve_request() # wanted dir doesn't matter here
             if "ssid" in params:
                 if "pass" not in params: # might not be necessary
                     params["pass"] = ""

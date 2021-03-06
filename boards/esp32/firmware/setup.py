@@ -1,10 +1,12 @@
-json.dumpo# TODO check unique first and then register sens
-import machine
+# TODO check unique first and then register sens
 from machine import Pin, I2C
 import time
 import re
 import json
 import socket
+import machine
+from webtool import WebTool
+import pages
 import urequests as requests
 
 
@@ -13,13 +15,6 @@ import urequests as requests
 # as Access Point mode.
 import network
 
-sta = network.WLAN(network.STA_IF)
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-if not sta.active():
-    sta.active(True)
-    while not sta.active():
-        pass
-print('network config:', sta.ifconfig())
 
 
 # ************************
@@ -34,15 +29,15 @@ import socket
 # ************************
 # Function for creating the
 # web page to be displayed
+POST_HEADERS = {'content-type': 'application/json'}
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sta = network.WLAN(network.STA_IF)
 class SensorConfig(WebTool):
     """Basic sensor configuration- host to push to, sensor name, and optional user login"""
-    def __init__(self, sta, sock, config_file="config.json"):
-        WebTool.__init__(self, sta, sock, config_file)
+    def __init__(self, sock, config_file="config.json"):
+        super().__init__(sock, config_file=config_file)
         self.host = 0
         self.username = 0
+        self.password = 0
         self.sensorname = 0
     def update_from_config(self):
         """Update progress (host, sensor name, login entered) from config file"""
@@ -51,130 +46,79 @@ class SensorConfig(WebTool):
             if "host" in config_data:
                 self.host = config_data["host"]
             if "username" in config_data:
-                self.uname = config_data["username"]
+                self.username = config_data["username"]
             if "sensorname" in config_data:
-                self.host = config_data["sensor"]
+                self.sensorname = config_data["sensor"]
+    def update_config(self):
+        """Update config file from instance variables"""
+        super().say("Updating config...")
+        with open(self.config_file, "r+") as config_file:
+            config_data = json.load(config_file)
+            if self.host:
+                config_data["host"] = self.host
+            if self.username:
+                config_data["username"] = self.username
+                config_data["password"] = self.password
+            if self.sensorname:
+                config_data["sensorname"] = self.sensorname
+            config_file.seek(0) # maybe unnecessary
+            json.dump(config_data, config_file)
+        super().say("config updated!")
 
 
-
-
-
-        response = main_page()
-
-        print("args: " + str(args))
-        if wanted == "login":
-            response = login_page()
-        elif wanted == "host":
-            print(wanted)
-            if "host" in args:
-                print(args['host'])
-                try:
-                    resp = requests.get(str(args["host"] + "/test")).text
-                except Exception as e:
-                    print(e)
-                    resp = 0
-                if resp == "OK":
-                    hostentered = True
-                    HOST = args["host"]
-                    response = main_page()
-                    with open('config.json', 'r+') as f:
-                        content = json.load(f)
-                        content["host"] = args["host"]
-                        f.seek(0)
-                        json.dump(content,f)
-                        print("host added to configuration!")
-                else:
-                    response = host_page(retry=True)
-            else:
-                response = host_page(retry=False)
-        elif wanted == "reset":
-            reset_settings()
-        elif wanted == "namesens":
-            if not hostentered:
-                response = main_page()
-            elif "sensname" in args:
-                print(args['sensname'])
-                try:
-                    uname = json.dumps({"sensorname":args['sensname']})
-                    resp = requests.post(str(HOST + "/api/regSens"), headers = {'content-type': 'application/json'}, data=uname).json()
-                    print("registering sensor reponse: " + str(resp))
-                    if resp["code"] == 200:
-                        with open('config.json', 'r+') as f:
-                            content = json.load(f)
-                            content["sensname"] = args["sensname"]
-                            f.seek(0)
-                            json.dump(content,f)
-                            print("sensor name added to configuration!")
-                        sensnamed = True
-                        SNAME = args["sensname"]
-                        response = main_page()
-                    else:
-                        response = sensname_page(retry=True)
-                except Exception as e:
-                    print("error in registering sensor: ")
-                    print(e)
-                    print(resp)
-                    response = sensname_page(retry=True)
-            else:
-                response = sensname_page(retry=False)
-
-
-
-print('serving')
-flag = sta.isconnected()
-if not flag:
-    try:
-        with open("config.json", "r") as f:
-            try:
-                data = json.load(f)
-                sta.connect(str(data["ssid"]), str(data["passwd"]))
-                counter = 0
-                while not sta.isconnected():
-                    time.sleep(1)
-                    counter += 1
-                    if counter > 5:
-                        break
-                if sta.isconnected():
-                    print('isconnected')
-                    flag = 1
-            except Exception as e:
-                print("failed  to write config! rebooting...")
-                print(e)
-    except:
-        pass
-if not flag:
-    machine.reset()
-
-while True:
-    print_config()
-    hostentered = False
-    loggedin = False
-    sensnamed = False
-
-    HOST= "NA"
-    UNAME = "NA"
-    SNAME = "NA"
-    with open("config.json", "r") as f:
-        f.seek(0)
-        data = json.load(f)
-        if "host" in data:
-            hostentered = True
-            HOST = data["host"]
-        if "username" in data and "password" in data:
-            loggedin = True
-            UNAME = data["username"]
-        if "sensname" in data:
-            sensnamed = True
-            SNAME = data["sensname"]
-    request = str(request, 'utf8')
-    if request != "":
+    @staticmethod
+    def check_host_up(host):
+        """Use the '/test' endpoint to check if the give host is up, returns the HTTP response"""
         try:
-            conn.send('HTTP/1.1 200 OK\n')
-            conn.send('Content-Type: text/html\n')
-            conn.send('Connection: close\n\n')
-            conn.sendall(response)
-            conn.close()
-        except: #this is probably bad don't do this
-            pass
-        else:
-            pass
+            resp = requests.get(str(host + "/test")).text
+            if resp == "OK":
+                return "OK"
+            return str(resp)
+        except Exception as e: # TODO make more specific
+            return e
+    def name_sensor(self, desired_sensor_name):
+        """
+        Attempts to register a sensor with the given name at the host
+        returns http code or error if it occurs
+        """
+        uname = json.dumps({"sensorname":desired_sensor_name})
+        try:
+            resp = requests.post(str(self.host + "/api/regSens"), headers = POST_HEADERS, data=uname).json()
+            return resp.code
+        except Exception as e:
+            return e
+
+    def route_request(self, wanted_dir, params):
+        """Takes the desired directory and returns the appropriate HTML page as a string"""
+        page_to_return = pages.setup_home_page()
+        if wanted_dir == "host":
+            if 'host' in params:
+                if self.check_host_up(params['host']) == "OK":
+                    self.host = params['host']
+                    page_to_return = pages.setup_home_page()
+                else:
+                    page_to_return = pages.host_page(retry=True)
+            else:
+                page_to_return = pages.host_page()
+        elif wanted_dir == "login":
+            if self.host:
+                page_to_return = pages.login_page()
+        elif wanted_dir == "namesens":
+            if self.host:
+                if "sensname" in params:
+                    if self.name_sensor(params["sensname"]) == 200: # TODO maybe add the error message to the page / print to oled
+                        page_to_return = pages.setup_home_page()
+                        self.sensorname = params["sensname"]
+                    else:
+                        page_to_return = pages.name_sensor(retry=True)
+                else:
+                    page_to_return = pages.name_sensor()
+        self.update_config()
+        return page_to_return
+    def run(self):
+        """Handler user configuration through HTML pages"""
+        while True:
+            self.update_from_config()
+            conn, wanted_dir, params = super().recieve_request()
+            print("wanted dir is " +  str(wanted_dir))
+            super().send_page(conn, self.route_request(wanted_dir, params))

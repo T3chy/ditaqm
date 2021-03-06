@@ -38,18 +38,18 @@ def ssid_connect_success():
            </body>
         </html>"""
     return html_page
-def main_setup_page(HOST=0, UNAME=0, SNAME=0):
+def setup_home_page(host=0, uname=0, sname=0):
     """Homepage for sensor configuration"""
-    if HOST:
-        hosttext = """<b> done! your host is : """ + HOST + """</b>"""
+    if host:
+        hosttext = """<b> done! your host is : """ + host + """</b>"""
     else:
         hosttext = """<a href= "/host"> do it! </a>"""
-    if UNAME:
-        logintext = """<b> done! Welcome, """ + UNAME  + """!</b>"""
+    if uname:
+        logintext = """<b> done! Welcome, """ + uname  + """!</b>"""
     else:
         logintext = """<a href= "/login"> do it! </a>"""
-    if SNAME:
-        nametext = """<b> done! Your sensor name is """ + SNAME + """</b>"""
+    if sname:
+        nametext = """<b> done! Your sensor name is """ + sname + """</b>"""
     else:
         nametext = """<a href= "/namesens"> do it! </a>"""
     html_page = """<!DOCTYPE HTML>
@@ -117,7 +117,7 @@ def host_page(retry=False, hostentered=False):
 
     return html_page
 
-def sensname_page(retry=False, sensnamed=False, hostentered=False): #TODO page for when they haven't entered a host
+def name_sensor(retry=False, sensnamed=False, hostentered=False): #TODO page for when they haven't entered a host
     """Page to name sensor"""
     if hostentered:
         if sensnamed:

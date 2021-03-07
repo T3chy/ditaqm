@@ -4,19 +4,19 @@ Parent class used to assist in wireless setup
 import json
 import time
 import re
+import os
 import ssd1306
 import usocket as socket
 import network
 from machine import Pin, I2C
-import os
 
 
 class WebTool:
     """said parent class"""
-    def __init__(self, sock, config_file="config.json"):
+    def __init__(self, sock=None, config_file="config.json"):
         sta = network.WLAN(network.STA_IF)
-        sta.active(False)
-        sta.active(True)
+        if not sta.active():
+            sta.active(True)
         while not sta.active():
             pass
         self.sta = sta
@@ -24,19 +24,31 @@ class WebTool:
         self.ssid = None
         self.passwd = None
         self.config_file = config_file
-        self.sock = sock
-        sock.bind(('',80)) # socket is reachable by any address the machine happens to have
-        sock.listen(5)     # max of 5 socket connections
+        if sock:
+            self.init_sock(sock)
+        else:
+            self.sock_bound = False
         self.i2c = I2C(-1, Pin(5), Pin(4))
         try:
             self.oled = ssd1306.SSD1306_I2C(128, 32, self.i2c)
-        except:
+        except: # TODO make this specific
             self.oled = None
         self.dns_addr = socket.getaddrinfo("127.0.0.1", 53)[0][-1]
-        if not os.path.exists(config_file):  # create config if it doesn't exist
-            with open(config_file, "w") as f:
+        try:
+            with open(self.config_file):  # create config if it doesn't exist
                 pass
+        except OSError:
+            with open(self.config_file, "w") as config_descriptor:
+                json.dump({},config_descriptor)
         # for DNS lookups
+    def init_sock(self, sock):
+        """Initalize a socket for interactive setup"""
+        addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+        sock.bind(addr)
+        sock.listen(1)
+        self.sock_bound = True
+        self.sock = sock
+
     def scan_ssids(self):
         """Scans local networks and returns an array of SSIDs"""
         self.say("Scanning local SSIDs...")
@@ -61,9 +73,9 @@ class WebTool:
         while not ap.active():
             pass
         self.ap = ap
-        self.say(str("ssid:"+ssid+"  pass:"+passwd))
+        self.say(str("ssid:"+ssid+"   pass:"+passwd))
         time.sleep(5) # so user can at least glance oled message
-        self.say("http:// " + str(self.ap.ifconfig()[0]))
+        self.say("http://        " + str(self.ap.ifconfig()))
 
     def reset_oled(self):
         """Blank the optionally attached oled screen"""
@@ -74,15 +86,17 @@ class WebTool:
         """Print a given message to the optionally attached oled screen, 15 chars per line"""
         if self.oled:
             self.reset_oled()
-            self.oled.text(str(msg[0:14], 0, 0)) # 1st line
-            self.oled.text(str(msg[15:], 0, 10)) # 2nd line
+            self.oled.text(str(msg[0:14]), 0, 0) # 1st line
+            self.oled.text(str(msg[15:]), 0, 10) # 2nd line
             self.oled.show()
         print("printing \"" + str(msg) + "\" to oled")
 
-    @property
-    def wlan_is_connected(self):
+    def wlan_is_connected(self): # should be a @property but it wasn't working as on
         """Return if the device is connceted to WLAN"""
-        return self.sta.isconnected()
+        try:
+            return self.sta.isconnected()
+        except AttributeError:
+            return False
     @property
     def read_config(self):
         """return the config json file as a dictionary"""
@@ -92,11 +106,14 @@ class WebTool:
     def connect_to_wlan(self, ssid=None, passwd=None):
         """Attempt to connect to the given ssid with the given password, defaults to config"""
         if ssid and passwd:
+            self.say("attempting     to connect""")
+            print('attempting to connect from given ssid(' + ssid + ") and passwd (" + passwd + ")")
             self.sta.connect(str(ssid), str(passwd))
         else:
             with open(self.config_file, 'r') as config_file:
                 config_data = json.load(config_file)
-                if "ssid" in config_data and "passwd" and config_data:
+                if "ssid" in config_data and "passwd" in config_data:
+                    self.say("attempting     to connect""")
                     self.sta.connect(str(config_data["ssid"]), str(config_data["passwd"]))
                 else:
                     return 0
@@ -115,7 +132,9 @@ class WebTool:
             config_data = json.load(config_file)
             for key in data_to_write:
                 config_data[key] = data_to_write[key]
+            config_file.seek(0)
             json.dump(config_data, config_file)
+        self.say("config written!")
     def reset_config(self, reset_wlan_too=False):
         """Resets user config file, keeps wlan credentials unless reset_wlan_too"""
         if reset_wlan_too:
@@ -127,35 +146,48 @@ class WebTool:
         with open(self.config_file, "w") as config_file:
             json.dump(data_to_write, config_file)
     def recieve_request(self):
-        """(blocking) recieve and parse an HTTP request"""
-        conn, = self.sock.accept()
+        """
+        (blocking) recieve and parse an HTTP request
+        return parsed HTTP request and socket connection object
+        """
+        conn, _ = self.sock.accept()
+        print('connection accepted!')
         request = conn.recv(1024)
-        return self.parse_request(request)
+        print('request recieved!')
+        parsed = self.parse_request(request)
+        return conn, parsed[0], parsed[1]
     @staticmethod
     def parse_request(request):
         """
-        Takes an HTTP request, returns an array
-        containing requested dir and a dict of parameters
+        Takes an HTTP request, returns requested dir and a dict of parameters
         """
-        wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip().lower()
-        wanted = str(wanted).replace("""%3a""", ":").replace("""%2f""", "/")
+        wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip()
+        wanted = str(wanted, 'utf-8').replace("""%3a""", ":").replace("""%2f""", "/")
         params = {}
-        if "?" in wanted:
-            wanted = wanted.split("?")
-            for i in range(1, len(wanted)): # first item will be requested dir
-                tmp = wanted[i].split("=")
-                if not "http://" in tmp[1] and not "https://" in tmp[1] and wanted[0] == "host":
-                # maybe that's not neccesary
-                    tmp[1] = "http://" + tmp[1]
-                params[tmp[0]] =  tmp[1] # probably functionize this
-            wanted = wanted[0]
-        return [wanted, params]
+        print("wanted =" + str(wanted))
+        if "?" not in wanted:
+            return [wanted, {}]
+        wanted = wanted.split("?")
+        wanted[0] = wanted[0].lower()
+        wanted[1] = wanted[1].split("&")
+        for i in range(len(wanted[1])):
+            tmp = wanted[1][i].split("=")
+            if not "http://" in tmp[1] and not "https://" in tmp[1] and wanted[0] == "host":
+            # maybe this isn't neccesary
+                tmp[1] = "http://" + tmp[1]
+            params[tmp[0]] = tmp[1]
+        return [wanted[0], params]
     @staticmethod
     def send_page(conn, page):
-        """Sends an HTTP response to conn containing page as it's content"""
-        conn.send('HTTP/1.1 200 OK\n')
-        conn.send('Content-Type: text/html\n')
-        conn.send('Connection: close\n\n')
-        conn.sendall(page)
-        conn.close()
-        time.sleep(1)
+        try:
+            """Sends an HTTP response to conn containing page as it's content"""
+            conn.send('HTTP/1.1 200 OK\n')
+            conn.send('Content-Type: text/html\n')
+            conn.send('Connection: close\n\n')
+            conn.sendall(page)
+            conn.close()
+            time.sleep(1)
+        except OSError as e:
+            print("error sending page")
+            print(e)
+            print("done printing error")

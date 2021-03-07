@@ -6,7 +6,12 @@ Once I'm on WLAN, serve sensor configuration over WLAN
 """
 import usocket as socket
 from ap import SetupAp
+from setup import SensorConfig
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-if True: # see if I can connect to WLAN
-    setup = SetupAp(sock)
-    setup.run()
+# so we don't need to hard reset in order to de/reallocate LAN resources
+setup = SetupAp()
+if not setup.wlan_is_connected():
+    setup.run(sock)
+print('ap over wlan time')
+setup = SensorConfig(sock)
+setup.run()

@@ -1,3 +1,6 @@
+"""
+HTTP-based setup over WLAN, configures sensor name, host, user login
+"""
 # TODO check unique first and then register sens
 from machine import Pin, I2C
 import time
@@ -39,6 +42,7 @@ class SensorConfig(WebTool):
         self.username = 0
         self.password = 0
         self.sensorname = 0
+        print('setup init done')
     def update_from_config(self):
         """Update progress (host, sensor name, login entered) from config file"""
         with open(self.config_file, "r") as config_file:
@@ -117,8 +121,13 @@ class SensorConfig(WebTool):
         return page_to_return
     def run(self):
         """Handler user configuration through HTML pages"""
+        print('starting main loop')
+        super().say("http://" + str(self.sta.ifconfig()[0]))
+        print(self.sta.ifconfig())
         while True:
             self.update_from_config()
+            print('waiting for a request')
             conn, wanted_dir, params = super().recieve_request()
+            print('request recieved and parsed!')
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))

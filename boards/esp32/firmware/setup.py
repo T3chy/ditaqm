@@ -36,8 +36,8 @@ POST_HEADERS = {'content-type': 'application/json'}
 
 class SensorConfig(WebTool):
     """Basic sensor configuration- host to push to, sensor name, and optional user login"""
-    def __init__(self, sock, config_file="config.json"):
-        super().__init__(sock, config_file=config_file)
+    def __init__(self, sock, lock, config_file="config.json"):
+        super().__init__(sock=sock, lock=lock, config_file=config_file)
         self.host = 0
         self.username = 0
         self.password = 0
@@ -52,7 +52,7 @@ class SensorConfig(WebTool):
             if "username" in config_data:
                 self.username = config_data["username"]
             if "sensorname" in config_data:
-                self.sensorname = config_data["sensor"]
+                self.sensorname = config_data["sensorname"]
     def update_config(self):
         """Update config file from instance variables"""
         super().say("Updating config...")
@@ -73,13 +73,15 @@ class SensorConfig(WebTool):
     @staticmethod
     def check_host_up(host):
         """Use the '/test' endpoint to check if the give host is up, returns the HTTP response"""
-        try:
-            resp = requests.get(str(host + "/test")).text
-            if resp == "OK":
-                return "OK"
-            return str(resp)
-        except Exception as e: # TODO make more specific
-            return e
+        # try:
+        resp = requests.get(str(host + "/test")).text
+        if resp == "OK":
+            return "OK"
+        return str(resp)
+        # except Exception as e: # TODO make more specific
+        #     print('exception in checking host')
+        #     print(e)
+            # return e
     def name_sensor(self, desired_sensor_name):
         """
         Attempts to register a sensor with the given name at the host
@@ -88,37 +90,46 @@ class SensorConfig(WebTool):
         uname = json.dumps({"sensorname":desired_sensor_name})
         try:
             resp = requests.post(str(self.host + "/api/regSens"), headers = POST_HEADERS, data=uname).json()
-            return resp.code
+            return resp["code"]
         except Exception as e:
+            print('exceptioon occured in registering sensor!')
+            print(e)
             return e
 
     def route_request(self, wanted_dir, params):
         """Takes the desired directory and returns the appropriate HTML page as a string"""
-        page_to_return = pages.setup_home_page()
+        page_to_return = 0
         if wanted_dir == "host":
             if 'host' in params:
+                print("host in params!")
                 if self.check_host_up(params['host']) == "OK":
+                    print('host is up')
                     self.host = params['host']
-                    page_to_return = pages.setup_home_page()
                 else:
-                    page_to_return = pages.host_page(retry=True)
+                    page_to_return = pages.host_page(retry=True, hostentered=self.host)
             else:
-                page_to_return = pages.host_page()
+                page_to_return = pages.host_page(hostentered=self.host)
         elif wanted_dir == "login":
             if self.host:
                 page_to_return = pages.login_page()
         elif wanted_dir == "namesens":
             if self.host:
-                if "sensname" in params:
-                    if self.name_sensor(params["sensname"]) == 200: # TODO maybe add the error message to the page / print to oled
-                        page_to_return = pages.setup_home_page()
-                        self.sensorname = params["sensname"]
+                if "sensorname" in params:
+                    if self.sensorname:
+                        page_to_return = pages.name_sensor(retry=False, sensnamed=self.sensorname, hostentered=self.host)
+                    elif self.name_sensor(params["sensorname"]) == 200: # TODO maybe add the error message to the page / print to oled
+                        self.sensorname = params["sensorname"]
                     else:
-                        page_to_return = pages.name_sensor(retry=True)
+                        page_to_return = pages.name_sensor(retry=True, sensnamed=self.sensorname, hostentered=self.host)
+                        # maybe I should put the pages as class methods
                 else:
-                    page_to_return = pages.name_sensor()
+                    page_to_return = pages.name_sensor(retry=False, sensnamed=self.sensorname, hostentered=self.host)
+            else:
+                page_to_return = pages.name_sensor(retry=False, sensnamed=self.sensorname, hostentered=self.host)
         self.update_config()
-        return page_to_return
+        if page_to_return:
+            return page_to_return
+        return pages.setup_home_page(host=self.host, uname=self.username, sname=self.sensorname)
     def run(self):
         """Handler user configuration through HTML pages"""
         print('starting main loop')
@@ -126,6 +137,8 @@ class SensorConfig(WebTool):
         print(self.sta.ifconfig())
         while True:
             self.update_from_config()
+            if self.host and self.sensorname:
+                self.lock.release()
             print('waiting for a request')
             conn, wanted_dir, params = super().recieve_request()
             print('request recieved and parsed!')

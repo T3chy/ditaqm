@@ -13,7 +13,7 @@ from machine import Pin, I2C
 
 class WebTool:
     """said parent class"""
-    def __init__(self, sock=None, config_file="config.json"):
+    def __init__(self, lock=None, sock=None, config_file="config.json"):
         sta = network.WLAN(network.STA_IF)
         if not sta.active():
             sta.active(True)
@@ -24,6 +24,7 @@ class WebTool:
         self.ssid = None
         self.passwd = None
         self.config_file = config_file
+        self.lock = lock
         if sock:
             self.init_sock(sock)
         else:
@@ -151,18 +152,23 @@ class WebTool:
         return parsed HTTP request and socket connection object
         """
         conn, _ = self.sock.accept()
-        print('connection accepted!')
         request = conn.recv(1024)
-        print('request recieved!')
         parsed = self.parse_request(request)
+        print("parsed request is " )
+        print(parsed)
         return conn, parsed[0], parsed[1]
     @staticmethod
     def parse_request(request):
         """
         Takes an HTTP request, returns requested dir and a dict of parameters
         """
+        print("request =" + str(request))
+        if request == b'':
+            return ["", {}]
         wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip()
         wanted = str(wanted, 'utf-8').replace("""%3a""", ":").replace("""%2f""", "/")
+        wanted = str(wanted, 'utf-8').replace("""%3A""", ":").replace("""%2F""", "/")
+        # I guess micropytthon doens't have case insensitive subtitutions
         params = {}
         print("wanted =" + str(wanted))
         if "?" not in wanted:
@@ -172,9 +178,9 @@ class WebTool:
         wanted[1] = wanted[1].split("&")
         for i in range(len(wanted[1])):
             tmp = wanted[1][i].split("=")
-            if not "http://" in tmp[1] and not "https://" in tmp[1] and wanted[0] == "host":
-            # maybe this isn't neccesary
-                tmp[1] = "http://" + tmp[1]
+            # if not "http://" in tmp[1] and not "https://" in tmp[1] and wanted[0] == "host":
+            # # maybe this isn't neccesary
+            #     tmp[1] = "http://" + tmp[1]
             params[tmp[0]] = tmp[1]
         return [wanted[0], params]
     @staticmethod

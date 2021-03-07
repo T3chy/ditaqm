@@ -117,7 +117,7 @@ def host_page(retry=False, hostentered=False):
 
     return html_page
 
-def name_sensor(retry=False, sensnamed=False, hostentered=False): #TODO page for when they haven't entered a host
+def name_sensor(retry=False, sensnamed=False, hostentered=False):
     """Page to name sensor"""
     if hostentered:
         if sensnamed:
@@ -152,9 +152,9 @@ def name_sensor(retry=False, sensnamed=False, hostentered=False): #TODO page for
                        <center>
                             <h2>Welcome to your Air Quality Cluster Setup!</h2>
                            """ + retry_msg + """
-                           <h2>Please enter your chosen sensor name below:</h2>>
+                           <h2>Please enter your chosen sensor name below:</h2>
                            <form>
-                               <input id='sensname' type='text' name="sensname" placeholder="ElamHouse">
+                               <input id='sensorname' type='text' name="sensorname" placeholder="ElamHouse">
                                <input type="submit" value="Submit">
                            </form> <br><br>
                            <a href="/"> return to homepage </a>

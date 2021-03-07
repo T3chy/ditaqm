@@ -8,7 +8,7 @@ import os
 import ssd1306
 import usocket as socket
 import network
-from machine import Pin, I2C
+from machine import Pin, SoftI2C
 
 
 class WebTool:
@@ -29,7 +29,7 @@ class WebTool:
             self.init_sock(sock)
         else:
             self.sock_bound = False
-        self.i2c = I2C(-1, Pin(5), Pin(4))
+        self.i2c = SoftI2C(Pin(5), Pin(4))
         try:
             self.oled = ssd1306.SSD1306_I2C(128, 32, self.i2c)
         except: # TODO make this specific

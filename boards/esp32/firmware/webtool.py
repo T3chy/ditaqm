@@ -76,7 +76,7 @@ class WebTool:
         self.ap = ap
         self.say(str("ssid:"+ssid+"   pass:"+passwd))
         time.sleep(5) # so user can at least glance oled message
-        self.say("http://        " + str(self.ap.ifconfig()))
+        self.say("http://        " + str(self.ap.ifconfig()[0]))
 
     def reset_oled(self):
         """Blank the optionally attached oled screen"""
@@ -122,10 +122,12 @@ class WebTool:
         while not self.sta.isconnected():
             time.sleep(1)
             counter += 1
-            if counter > 5:
+            if counter > 10:
                 break
         if self.sta.isconnected():
             return self.sta.ifconfig()[0]
+        print('failed to connect')
+        print(self.sta.isconnected())
         return 0
     def write_config(self, data_to_write):
         """Updates the config file with key-values given in data_to_write"""

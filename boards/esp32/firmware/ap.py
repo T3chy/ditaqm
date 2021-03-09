@@ -34,8 +34,3 @@ class SetupAp(WebTool):
             else:
                 to_send = pages.choose_ssid(ssid_html)
             super().send_page(conn, to_send)
-            if conn_succ:
-                super().say("connected to wifi!")
-                time.sleep(1)
-                super().say("rebooting...")
-                machine.reset()

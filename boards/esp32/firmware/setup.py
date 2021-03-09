@@ -138,7 +138,8 @@ class SensorConfig(WebTool):
         while True:
             self.update_from_config()
             if self.host and self.sensorname:
-                self.lock.release()
+                if self.lock.locked():
+                    self.lock.release()
             print('waiting for a request')
             conn, wanted_dir, params = super().recieve_request()
             print('request recieved and parsed!')

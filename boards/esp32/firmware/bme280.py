@@ -277,3 +277,5 @@ class BME280:
     "Return the humidity in percent."
     h = self.read_humidity()
     return h / 1000
+  def read(self):
+      return {"temperature":self.temperature, "pressure":self.pressure, "humidity":self.humidity}

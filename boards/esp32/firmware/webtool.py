@@ -99,7 +99,7 @@ class WebTool:
         except AttributeError:
             return False
     @property
-    def read_config(self):
+    def config(self):
         """return the config json file as a dictionary"""
         with open(self.config_file, "r") as config_file:
             config_data = json.load(config_file)
@@ -107,27 +107,22 @@ class WebTool:
     def connect_to_wlan(self, ssid=None, passwd=None):
         """Attempt to connect to the given ssid with the given password, defaults to config"""
         if ssid and passwd:
-            self.say("attempting     to connect""")
+            self.say("connecting to  " + str(ssid))
             print('attempting to connect from given ssid(' + ssid + ") and passwd (" + passwd + ")")
             self.sta.connect(str(ssid), str(passwd))
         else:
             with open(self.config_file, 'r') as config_file:
                 config_data = json.load(config_file)
                 if "ssid" in config_data and "passwd" in config_data:
-                    self.say("attempting     to connect""")
+                    self.say("connecting to  " + str(config_data["ssid"]))
                     self.sta.connect(str(config_data["ssid"]), str(config_data["passwd"]))
                 else:
                     return 0
-        counter = 0
-        while not self.sta.isconnected():
-            time.sleep(1)
-            counter += 1
-            if counter > 10:
-                break
+        while self.sta.status() == network.STAT_CONNECTING:
+            pass
         if self.sta.isconnected():
             return self.sta.ifconfig()[0]
         print('failed to connect')
-        print(self.sta.isconnected())
         return 0
     def write_config(self, data_to_write):
         """Updates the config file with key-values given in data_to_write"""

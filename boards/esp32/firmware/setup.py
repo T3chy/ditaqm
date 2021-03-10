@@ -13,25 +13,10 @@ import pages
 import urequests as requests
 
 
-# ************************
-# Configure the ESP32 wifi
-# as Access Point mode.
 import network
 
-
-
-# ************************
-# Configure the socket connection
-# over TCP/IP
 import socket
 
-# AF_INET - use Internet Protocol v4 addresses
-# SOCK_STREAM means that it is a TCP socket.
-# SOCK_DGRAM means that it is a UDP socket.
-
-# ************************
-# Function for creating the
-# web page to be displayed
 POST_HEADERS = {'content-type': 'application/json'}
 
 class SensorConfig(WebTool):

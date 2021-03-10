@@ -22,6 +22,9 @@ class Cluster:
     def detect_sensors(self):
         """autodetects and initalizes sensors, returns a dict of detected sensors"""
         scan = self.i2c.scan()
+        if len(scan) > 100:
+            # scan returns every addr when sda is pulled up
+            scan = []
         self.sensors = {}
         """
         Pin values for the MiCS6814 measurements
@@ -44,6 +47,8 @@ class Cluster:
             self.sensors["pms7003"] = pms
         except pms7003.UartError:
             pass
+        except TypeError:
+            pass
         return list(self.sensors.keys())
     def take_measurement(self):
         """
@@ -53,8 +58,10 @@ class Cluster:
         for sensor in self.sensors:
             tmp = {}
             try:
-                tmp = sensor.read()
-            except:
+                tmp = self.sensors[sensor].read()
+            except Exception as e:
+                print('frig')
+                print(e)
                 pass # TODO make this useful
             full_sample.update(tmp)
         return full_sample

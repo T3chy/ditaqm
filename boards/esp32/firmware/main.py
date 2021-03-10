@@ -10,6 +10,8 @@ import usocket as socket
 from ap import SetupAp
 from setup import SensorConfig
 import machine
+import cluster
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # so we don't need to hard reset in order to de/reallocate LAN resources
 setup = SetupAp()
@@ -19,12 +21,17 @@ if not setup.wlan_is_connected():
     setup.say("connected to wifi!")
     time.sleep(1)
     setup.say("rebooting...")
+    setup.sta.disconnect()
     machine.reset()
-print('ap over, wlan time')
 config_lock = _thread.allocate_lock()
 # config_lock.acquire() # lock until at least host and sensorname are configured
 setup = SensorConfig(sock,config_lock)
 _thread.start_new_thread(setup.run, ())
 while not config_lock.acquire():
     pass
-print('configed!')
+
+sensor_cluster = cluster.Cluster(setup.config)
+# _thread.start_new_thread(
+print(sensor_cluster.detect_sensors())
+print(sensor_cluster.take_measurement())
+print('configed! dropping into REPL')

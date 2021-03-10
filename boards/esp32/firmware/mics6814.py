@@ -1,5 +1,6 @@
 # needs 20 mins to warm up before sensor readings are usable
 from machine import ADC, Pin
+import time
 
 ADC_MAX_VALUE = 4095
 ADC_MIN_VALUE = 0
@@ -34,11 +35,12 @@ class MICS6814:
                 tmpnh3 += tmp
             else:
                 sane = False
-            tmp = self.nh3.read()
+            tmp = self.co.read()
             if ADC_MIN_VALUE  >= tmp <= ADC_MAX_VALUE:
                 tmpco += tmp
             else:
                 sane = False
+            time.sleep_ms(ADC_SAMPLE_DELAY)
         if sane:
             return {"no2":tmpno2 / ADC_SAMPLE, "nh3":tmpnh3 / ADC_SAMPLE, "co": tmpco / ADC_SAMPLE}
         return 0

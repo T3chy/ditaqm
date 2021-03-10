@@ -4,7 +4,7 @@ An inital access Point generated when there are no WAN network credentials confi
 import machine
 import time
 import pages
-from webtool import WebTool
+From webtool import WebTool
 
 class SetupAp(WebTool):
     """Help the user connect to an SSID"""

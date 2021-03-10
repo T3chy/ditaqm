@@ -182,8 +182,8 @@ class WebTool:
         return [wanted[0], params]
     @staticmethod
     def send_page(conn, page):
+        """Sends an HTTP response to conn containing page as it's content"""
         try:
-            """Sends an HTTP response to conn containing page as it's content"""
             conn.send('HTTP/1.1 200 OK\n')
             conn.send('Content-Type: text/html\n')
             conn.send('Connection: close\n\n')

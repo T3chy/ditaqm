@@ -1,11 +1,22 @@
 # needs 20 mins to warm up before sensor readings are usable
 from machine import ADC, Pin
 import time
+import math
 
 ADC_MAX_VALUE = 4095
 ADC_MIN_VALUE = 0
 ADC_SAMPLE = 3
 ADC_SAMPLE_DELAY = 100
+# ask ajith about these
+V0_CH0 = 0.24988262581255533
+V0_CH1 = 1.712802270577105
+V0_CH2 = 2.786960051271096
+R00 = 69./((3.3/V0_CH0)-1.)
+R01 = 220./((3.3/V0_CH0)-1.)
+R02 = 220./((3.3/V0_CH0)-1.)
+R00 = 48.
+R01 = 29.
+R02 = 160.
 class MICS6814:
     """Class for interacting with the MiCS-6814 sensor"""
     def __init__(self, no2_pin=Pin(33), nh3_pin=Pin(32), co_pin=Pin(34)):
@@ -25,20 +36,18 @@ class MICS6814:
         tmpnh3 =  0
         tmpco = 0
         for _ in range(ADC_SAMPLE):
-            tmp = self.no2.read()
-            if ADC_MIN_VALUE  >= tmp <= ADC_MAX_VALUE:
-                tmpno2 += tmp
-            else:
-                sane = False
-            tmp = self.nh3.read()
-            if ADC_MIN_VALUE  >= tmp <= ADC_MAX_VALUE:
-                tmpnh3 += tmp
-            else:
-                sane = False
-            tmp = self.co.read()
-            if ADC_MIN_VALUE  >= tmp <= ADC_MAX_VALUE:
-                tmpco += tmp
-            else:
+            ch0_oxy_r =  69./((5.0/self.no2.read())-1.)
+            ch1_nh3_r =  220./((5.0/self.nh3.read())-1.)
+            ch2_red_r =  220./((5.0/self.co.read())-1.)
+
+            ch0_oxy_r_ratio = ch0_oxy_r/R00
+            ch1_nh3_r_ratio = ch1_nh3_r/R01
+            ch2_red_r_ratio = ch2_red_r/R02
+
+            tmpno2 =+ 0.1516*math.pow(ch0_oxy_r_ratio, 0.9979)
+            tmpnh3 =+ 0.6151*math.pow(ch1_nh3_r_ratio, -1.903)
+            tmpco =+ 4.4638*math.pow(ch2_red_r_ratio, -1.177)
+            if not tmpno2 or not tmpnh3 or not tmpco:
                 sane = False
             time.sleep_ms(ADC_SAMPLE_DELAY)
         if sane:

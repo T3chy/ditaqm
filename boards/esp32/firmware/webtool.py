@@ -32,9 +32,9 @@ class WebTool:
         self.i2c = SoftI2C(Pin(5), Pin(4))
         try:
             self.oled = ssd1306.SSD1306_I2C(128, 32, self.i2c)
-        except: # TODO make this specific
+        except Exception as e: # TODO make this specific
+            print(e)
             self.oled = None
-        self.dns_addr = socket.getaddrinfo("127.0.0.1", 53)[0][-1]
         try:
             with open(self.config_file):  # create config if it doesn't exist
                 pass
@@ -63,19 +63,16 @@ class WebTool:
         ssid_list +=  "</select>"
         return ssid_list
 
-    def setup_ap(self, ssid='cluster', passwd='12345678'):
+    def setup_ap(self, ssid='cluster'):
         """Sets up an Access Point and prints creds to OLED"""
         self.ssid = ssid
-        self.passwd = passwd
         ap = network.WLAN(network.AP_IF)
         ap.active(False)
         ap.active(True)
-        ap.config(essid=ssid, password=passwd)
+        ap.config(essid=ssid)
         while not ap.active():
             pass
         self.ap = ap
-        self.say(str("ssid:"+ssid+"   pass:"+passwd))
-        time.sleep(5) # so user can at least glance oled message
         self.say("http://        " + str(self.ap.ifconfig()[0]))
 
     def reset_oled(self):
@@ -107,17 +104,17 @@ class WebTool:
     def connect_to_wlan(self, ssid=None, passwd=None):
         """Attempt to connect to the given ssid with the given password, defaults to config"""
         if ssid and passwd:
-            self.say("connecting to  " + str(ssid))
             print('attempting to connect from given ssid(' + ssid + ") and passwd (" + passwd + ")")
             self.sta.connect(str(ssid), str(passwd))
+            self.say("connecting to  " + str(ssid))
         else:
             with open(self.config_file, 'r') as config_file:
                 config_data = json.load(config_file)
                 if "ssid" in config_data and "passwd" in config_data:
-                    self.say("connecting to  " + str(config_data["ssid"]))
                     self.sta.connect(str(config_data["ssid"]), str(config_data["passwd"]))
                 else:
                     return 0
+            self.say("connecting to " + str(config_data["ssid"]))
         while self.sta.status() == network.STAT_CONNECTING:
             pass
         if self.sta.isconnected():
@@ -132,7 +129,6 @@ class WebTool:
                 config_data[key] = data_to_write[key]
             config_file.seek(0)
             json.dump(config_data, config_file)
-        self.say("config written!")
     def reset_config(self, reset_wlan_too=False):
         """Resets user config file, keeps wlan credentials unless reset_wlan_too"""
         if reset_wlan_too:

@@ -40,7 +40,6 @@ class SensorConfig(WebTool):
                 self.sensorname = config_data["sensorname"]
     def update_config(self):
         """Update config file from instance variables"""
-        super().say("Updating config...")
         with open(self.config_file, "r+") as config_file:
             config_data = json.load(config_file)
             if self.host:
@@ -118,15 +117,14 @@ class SensorConfig(WebTool):
     def run(self):
         """Handler user configuration through HTML pages"""
         print('starting main loop')
-        super().say("http://" + str(self.sta.ifconfig()[0]))
         print(self.sta.ifconfig())
         while True:
+            super().say("http://" + str(self.sta.ifconfig()[0]))
             self.update_from_config()
             if self.host and self.sensorname:
                 if self.lock.locked():
                     self.lock.release()
             print('waiting for a request')
             conn, wanted_dir, params = super().recieve_request()
-            print('request recieved and parsed!')
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))

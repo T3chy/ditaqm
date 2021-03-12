@@ -29,6 +29,7 @@ setup = SensorConfig(sock,config_lock)
 _thread.start_new_thread(setup.run, ())
 while not config_lock.acquire():
     pass
+setup.reset_oled()
 
 sensor_cluster = cluster.Cluster(setup.config)
 # _thread.start_new_thread(

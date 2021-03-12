@@ -160,8 +160,6 @@ class Adafruit_BME680:
     var3 = (_LOOKUP_TABLE_2[self._gas_range] * var1) / 512
     calc_gas_res = (var3 + (var2 / 2)) / var2
     return int(calc_gas_res)
-  def read(self):
-      return {"temperature":self.temperature, "pressure":self.pressure, "humidity":self.humidity, "gas":self.gas}
   def _perform_reading(self):
     if (time.ticks_diff(self._last_reading, time.ticks_ms()) * time.ticks_diff(0, 1)
         < self._min_refresh_time):
@@ -229,3 +227,5 @@ class BME680_I2C(Adafruit_BME680):
     for value in values:
       self._i2c.writeto_mem(self._address, register, bytearray([value & 0xFF]))
       register += 1
+  def read(self):
+      return {"temperature":self.temperature, "pressure":self.pressure, "humidity":self.humidity, "gas":self.gas}

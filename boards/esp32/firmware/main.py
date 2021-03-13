@@ -23,16 +23,24 @@ if not setup.wlan_is_connected():
     setup.say("rebooting...")
     setup.sta.disconnect()
     machine.reset()
-config_lock = _thread.allocate_lock()
+lock = _thread.allocate_lock()
 # config_lock.acquire() # lock until at least host and sensorname are configured
-setup = SensorConfig(sock,config_lock)
+setup = SensorConfig(sock,lock)
 _thread.start_new_thread(setup.run, ())
-while not config_lock.acquire():
+while not lock.acquire():
     pass
 setup.reset_oled()
 
 sensor_cluster = cluster.Cluster(setup.config)
 # _thread.start_new_thread(
-print(sensor_cluster.detect_sensors())
-print(sensor_cluster.take_measurement())
-print('configed! dropping into REPL')
+lock.release()
+
+print('sensor time')
+for i in range(30):
+    time.sleep(5)
+    print('sens')
+    while not lock.acquire():
+        machine.idle()
+    print(sensor_cluster.detect_sensors())
+    print(sensor_cluster.take_measurement())
+    lock.release()

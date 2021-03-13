@@ -124,7 +124,9 @@ class SensorConfig(WebTool):
             if self.host and self.sensorname:
                 if self.lock.locked():
                     self.lock.release()
-            print('waiting for a request')
             conn, wanted_dir, params = super().recieve_request()
+            while not self.lock.acquire():
+                machine.idle()
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))
+            self.lock.release()

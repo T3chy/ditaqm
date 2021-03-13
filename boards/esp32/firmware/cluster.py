@@ -38,7 +38,7 @@ class Cluster:
 
         # attempt to take a reading from the MiCS6814 sensor
         self.sensors["mics6814"] = mics6814.MICS6814()
-        if self.sensors["mics6814"].read() == 0: # nonsensical ADC value
+        if self.sensors["mics6814"].read(detect=True) == 0: # nonsensical ADC value
             self.sensors.pop("mics6814") # not connected
 
         #attempt to initalize pms7003 sensor on uart bus 1

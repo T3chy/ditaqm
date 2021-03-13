@@ -29,19 +29,21 @@ class MICS6814:
         """
         According to datasheet, the MiCS-6814 outputs a max of 2.4v on the analog pins so we attenuate to 11db where the max input voltage is 3.6v to be safe
         """
-    def read(self):
+    def read(self, detect=False):
         """returns a dictionary containing measurements after taking ADC_SAMPLE samples"""
         sane = True
         tmpno2 = 0
         tmpnh3 =  0
         tmpco = 0
+        if detect:
+            ADC_SAMPLE = 10
         for _ in range(ADC_SAMPLE):
             # convert 12 bit adc reading to votlage
             ch0_voltage = self.no2.read() * (3.3/4095)
             ch1_voltage = self.nh3.read() * (3.3/4095)
             ch2_voltage = self.co.read() * (3.3/4095)
-            # if all voltages are 0, the sensor is likley not plugged in
-            if ch0_voltage == 0 and ch1_voltage == 0 and ch2_voltage == 0:
+            # if a voltage is 0, the sensor is likley not plugged in
+            if ch0_voltage == 0 or ch1_voltage == 0 or ch2_voltage == 0:
                 sane = False
                 break
             # adjust for pullup resistors

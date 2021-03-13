@@ -30,10 +30,14 @@ class WebTool:
         else:
             self.sock_bound = False
         self.i2c = SoftI2C(Pin(5), Pin(4))
-        try:
-            self.oled = ssd1306.SSD1306_I2C(128, 32, self.i2c)
-        except Exception as e: # TODO make this specific
-            print(e)
+        # check if ssd1306 (default addr 60 / 0x3c) is detected
+        if 60 in self.i2c.scan():
+            try:
+                self.oled = ssd1306.SSD1306_I2C(128, 32, self.i2c)
+            except Exception as e: # TODO make this specific
+                print(e)
+                self.oled = None
+        else:
             self.oled = None
         try:
             with open(self.config_file):  # create config if it doesn't exist
@@ -155,7 +159,6 @@ class WebTool:
         """
         Takes an HTTP request, returns requested dir and a dict of parameters
         """
-        print("request =" + str(request))
         if request == b'':
             return ["", {}]
         wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip()

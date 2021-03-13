@@ -36,17 +36,20 @@ class MICS6814:
         tmpnh3 =  0
         tmpco = 0
         for _ in range(ADC_SAMPLE):
-            ch0_oxy_r =  69./((3.3/self.no2.read())-1.)
-            ch1_nh3_r =  220./((3.3/self.nh3.read())-1.)
-            ch2_red_r =  220./((3.3/self.co.read())-1.)
+            ch0_voltage = self.no2.read() * (3.3/4095)
+            ch1_voltage = self.nh3.read() * (3.3/4095)
+            ch2_voltage = self.co.read() * (3.3/4095)
+            if ch0_voltage == 0 and ch1_voltage == 0 and ch2_voltage == 0:
+                sane = False
+                break
+            ch0_oxy_r =  69./((3.3/ch0_voltage)-1.)
+            ch1_nh3_r =  220./((3.3/ch1_voltage)-1.)
+            ch2_red_r =  220./((3.3/ch2_voltage)-1.)
 
             ch0_oxy_r_ratio = ch0_oxy_r/R00
             ch1_nh3_r_ratio = ch1_nh3_r/R01
             ch2_red_r_ratio = ch2_red_r/R02
 
-            print(ch0_oxy_r_ratio)
-            # broken rn oxy r ratio is negative ?
-            return 0
             tmpno2 =+ 0.1516*math.pow(ch0_oxy_r_ratio, 0.9979)
             tmpnh3 =+ 0.6151*math.pow(ch1_nh3_r_ratio, -1.903)
             tmpco =+ 4.4638*math.pow(ch2_red_r_ratio, -1.177)

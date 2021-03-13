@@ -5,7 +5,6 @@ import math
 
 ADC_MAX_VALUE = 4095
 ADC_MIN_VALUE = 0
-ADC_SAMPLE = 3
 ADC_SAMPLE_DELAY = 100
 # ask ajith about these
 V0_CH0 = 0.24988262581255533
@@ -36,7 +35,9 @@ class MICS6814:
         tmpnh3 =  0
         tmpco = 0
         if detect:
-            ADC_SAMPLE = 10
+            ADC_SAMPLE = 20
+        else:
+            ADC_SAMPLE = 3
         for _ in range(ADC_SAMPLE):
             # convert 12 bit adc reading to votlage
             ch0_voltage = self.no2.read() * (3.3/4095)

@@ -7,6 +7,7 @@ import bme280
 import bme680
 import pms7003
 import mics6814
+import mhz19b
 import urequests as requests
 POST_HEADERS = {'content-type': 'application/json'}
 class Cluster:
@@ -40,6 +41,10 @@ class Cluster:
         self.sensors["mics6814"] = mics6814.MICS6814()
         if self.sensors["mics6814"].read(detect=True) == 0: # nonsensical ADC value
             self.sensors.pop("mics6814") # not connected
+        # attempt to take a reading from the MH-Z19B sensor
+        self.sensors["mhz19b"] = mhz19b.MHZ19B()
+        if self.sensors["mhz19b"].read() == 0: # nonsensical ADC value
+            self.sensors.pop("mhz19b") # not connected
 
         #attempt to initalize pms7003 sensor on uart bus 1
         try:

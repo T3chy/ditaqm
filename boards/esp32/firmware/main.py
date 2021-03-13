@@ -36,7 +36,7 @@ sensor_cluster = cluster.Cluster(setup.config)
 lock.release()
 
 print('sensor time')
-for i in range(30):
+for i in range(5):
     time.sleep(5)
     print('sens')
     while not lock.acquire():

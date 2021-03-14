@@ -11,36 +11,54 @@ from ap import SetupAp
 from setup import SensorConfig
 import machine
 import cluster
+def sample(clust, lock, interval=30):
+    """
+    Send periodic measurements from connected sensors, exits when the provided lock is acquired
+    """
+    # lock is released when user decides to start
+    # to be implemented, lol
+    while not lock.acquire():
+        pass
+    lock.release()
+    while True:
+        clust.send_sample()
+        time.sleep(interval)
+        if lock.locked():
+            break
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# so we don't need to hard reset in order to de/reallocate LAN resources
 setup = SetupAp()
-time.sleep(3)
+
 if not setup.wlan_is_connected():
+    # launch setup AP and get valid wifi creds, then reboot
     setup.run(sock)
     setup.say("connected to wifi!")
     time.sleep(1)
     setup.say("rebooting...")
     setup.sta.disconnect()
     machine.reset()
-lock = _thread.allocate_lock()
-# config_lock.acquire() # lock until at least host and sensorname are configured
-setup = SensorConfig(sock,lock)
+
+config_lock = _thread.allocate_lock()
+sample_lock = _thread.allocate_lock()
+config_lock.acquire()
+# lock until at least host and sensorname are configured, so we have somewhere to push
+
+setup = SensorConfig(sock,config_lock)
+# keeps lock until host and sensorname are entered
+#takes and releases lock as config is being read / pages are being sent
 _thread.start_new_thread(setup.run, ())
-while not lock.acquire():
+
+while not config_lock.acquire():
     pass
+
 setup.reset_oled()
 
+# init sensors
 sensor_cluster = cluster.Cluster(setup.config)
-# _thread.start_new_thread(
-lock.release()
+config_lock.release()
 
 print('sensor time')
-for i in range(5):
-    time.sleep(5)
-    print('sens')
-    while not lock.acquire():
-        machine.idle()
-    print(sensor_cluster.detect_sensors())
-    print(sensor_cluster.take_measurement())
-    lock.release()
+_thread.start_new_thread(sample, (sensor_cluster, sample_lock))
+if input("kill sampling? [Y/n] \n") != "n":
+    sample_lock.acquire()

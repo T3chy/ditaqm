@@ -58,7 +58,7 @@ class Pms7003:
         nr_of_written_bytes = self.uart.write(request)
 
         if nr_of_written_bytes != len(request):
-            raise UartError('Failed to write to UART')
+            raise UartError("Failed to write to UART")
 
         if response:
             time.sleep(2)
@@ -66,7 +66,7 @@ class Pms7003:
 
             if buffer != response:
                 raise UartError(
-                    'Wrong UART response, expecting: {}, getting: {}'.format(
+                    "Wrong UART response, expecting: {}, getting: {}".format(
                         Pms7003._format_bytearray(response), Pms7003._format_bytearray(buffer)
                     )
                 )
@@ -88,7 +88,7 @@ class Pms7003:
             if len(read_bytes) < 30:
                 continue
 
-            data = struct.unpack('!HHHHHHHHHHHHHBBH', read_bytes)
+            data = struct.unpack("!HHHHHHHHHHHHHBBH", read_bytes)
 
             checksum = Pms7003.START_BYTE_1 + Pms7003.START_BYTE_2
             checksum += sum(read_bytes[:28])
@@ -97,22 +97,22 @@ class Pms7003:
                 continue
 
             return {
-                'FRAME_LENGTH': data[Pms7003.PMS_FRAME_LENGTH],
-                'PM1_0': data[Pms7003.PMS_PM1_0],
-                'PM2_5': data[Pms7003.PMS_PM2_5],
-                'PM10_0': data[Pms7003.PMS_PM10_0],
-                'PM1_0_ATM': data[Pms7003.PMS_PM1_0_ATM],
-                'PM2_5_ATM': data[Pms7003.PMS_PM2_5_ATM],
-                'PM10_0_ATM': data[Pms7003.PMS_PM10_0_ATM],
-                'PCNT_0_3': data[Pms7003.PMS_PCNT_0_3],
-                'PCNT_0_5': data[Pms7003.PMS_PCNT_0_5],
-                'PCNT_1_0': data[Pms7003.PMS_PCNT_1_0],
-                'PCNT_2_5': data[Pms7003.PMS_PCNT_2_5],
-                'PCNT_5_0': data[Pms7003.PMS_PCNT_5_0],
-                'PCNT_10_0': data[Pms7003.PMS_PCNT_10_0],
-                'VERSION': data[Pms7003.PMS_VERSION],
-                'ERROR': data[Pms7003.PMS_ERROR],
-                'CHECKSUM': data[Pms7003.PMS_CHECKSUM],
+                "FRAME_LENGTH": data[Pms7003.PMS_FRAME_LENGTH],
+                "PM1_0": data[Pms7003.PMS_PM1_0],
+                "PM2_5": data[Pms7003.PMS_PM2_5],
+                "PM10_0": data[Pms7003.PMS_PM10_0],
+                "PM1_0_ATM": data[Pms7003.PMS_PM1_0_ATM],
+                "PM2_5_ATM": data[Pms7003.PMS_PM2_5_ATM],
+                "PM10_0_ATM": data[Pms7003.PMS_PM10_0_ATM],
+                "PCNT_0_3": data[Pms7003.PMS_PCNT_0_3],
+                "PCNT_0_5": data[Pms7003.PMS_PCNT_0_5],
+                "PCNT_1_0": data[Pms7003.PMS_PCNT_1_0],
+                "PCNT_2_5": data[Pms7003.PMS_PCNT_2_5],
+                "PCNT_5_0": data[Pms7003.PMS_PCNT_5_0],
+                "PCNT_10_0": data[Pms7003.PMS_PCNT_10_0],
+                "VERSION": data[Pms7003.PMS_VERSION],
+                "ERROR": data[Pms7003.PMS_ERROR],
+                "CHECKSUM": data[Pms7003.PMS_CHECKSUM],
             }
 
 

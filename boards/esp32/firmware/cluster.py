@@ -9,16 +9,15 @@ import pms7003
 import mics6814
 import mhz19b
 import urequests as requests
-POST_HEADERS = {'content-type': 'application/json'}
+POST_HEADERS = {"content-type": "application/json"}
 class Cluster:
     """
     Class for interfacing with supported sensor modules
     """
     def __init__(self, config):
         self.sensors = {}
-        self.config = {}
+        self.config = config
         self.i2c = SoftI2C(Pin(5), Pin(4))
-        # self.uart_1
         self.detect_sensors()
     def detect_sensors(self):
         """autodetects and initalizes sensors, returns a dict of detected sensors"""
@@ -27,9 +26,6 @@ class Cluster:
             # scan returns every addr when sda is pulled up
             scan = []
         self.sensors = {}
-        """
-        Pin values for the MiCS6814 measurements
-        """
 
         # attempt to detect bme sensors at their default i2c addresses
         if 118 in scan:
@@ -39,17 +35,19 @@ class Cluster:
 
         # attempt to take a reading from the MiCS6814 sensor
         self.sensors["mics6814"] = mics6814.MICS6814()
-        if self.sensors["mics6814"].read(detect=True) == 0: # nonsensical ADC value
+        if self.sensors["mics6814"].read(detect=True) == 0: # read() returns 0 on nonsensecial value
             self.sensors.pop("mics6814") # not connected
+
         # attempt to take a reading from the MH-Z19B sensor
         self.sensors["mhz19b"] = mhz19b.MHZ19B()
-        if self.sensors["mhz19b"].read() == 0: # nonsensical ADC value
+        if self.sensors["mhz19b"].read() == 0: # read() returns 0 on failure
             self.sensors.pop("mhz19b") # not connected
 
         #attempt to initalize pms7003 sensor on uart bus 1
         try:
             pms = pms7003.PassivePms7003()
             self.sensors["pms7003"] = pms
+        # if fail to init, probably not connected
         except pms7003.UartError:
             pass
         except TypeError:
@@ -65,7 +63,7 @@ class Cluster:
             try:
                 tmp = self.sensors[sensor].read()
             except Exception as e:
-                print('frig')
+                print("Error in taking measure from sensor " + str(sensor))
                 print(e)
                 pass # TODO make this useful
             full_sample.update(tmp)
@@ -85,6 +83,5 @@ class Cluster:
         except Exception as e:
             print("error POSTing data sample!")
             print(e)
-            print('done printing error')
             return e
         return resp["code"]

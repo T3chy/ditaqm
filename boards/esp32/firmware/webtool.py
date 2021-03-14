@@ -13,7 +13,7 @@ from machine import Pin, SoftI2C
 
 class WebTool:
     """said parent class"""
-    def __init__(self, lock=None, sock=None, config_file="config.json"):
+    def __init__(self, config_lock=None, sample_lock= None, sock=None, config_file="config.json"):
         sta = network.WLAN(network.STA_IF)
         if not sta.active():
             sta.active(True)
@@ -24,7 +24,8 @@ class WebTool:
         self.ssid = None
         self.passwd = None
         self.config_file = config_file
-        self.lock = lock
+        self.config_lock = config_lock
+        self.sample_lock = sample_lock
         if sock:
             self.init_sock(sock)
         else:
@@ -40,7 +41,7 @@ class WebTool:
         else:
             self.oled = None
         try:
-            with open(self.config_file):  # create config if it doesn't exist
+            with open(self.config_file):  # create config if it doesn"t exist
                 pass
         except OSError:
             with open(self.config_file, "w") as config_descriptor:
@@ -48,7 +49,7 @@ class WebTool:
         # for DNS lookups
     def init_sock(self, sock):
         """Initalize a socket for interactive setup"""
-        addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+        addr = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
         sock.bind(addr)
         sock.listen(1)
         self.sock_bound = True
@@ -56,18 +57,17 @@ class WebTool:
 
     def scan_ssids(self):
         """Scans local networks and returns an array of SSIDs"""
-        self.say("Scanning local SSIDs...")
         return [net[0] for net in self.sta.scan()]
     def get_html_ssid_list(self):
         """Returns an HTML string containing dropdown menu with connectable SSIDs"""
         ssid_list = "<select id=\"ssid\" name=\"ssid\">"
         for ssid in self.scan_ssids():
-            ssid = str(ssid).strip('b').strip('\'').strip("\"")
+            ssid = str(ssid).strip("b").strip("\"").strip("\"")
             ssid_list += "<option value= \"" + ssid + "\">" + ssid + "</option>"
         ssid_list +=  "</select>"
         return ssid_list
 
-    def setup_ap(self, ssid='cluster'):
+    def setup_ap(self, ssid="cluster"):
         """Sets up an Access Point and prints creds to OLED"""
         self.ssid = ssid
         ap = network.WLAN(network.AP_IF)
@@ -77,7 +77,6 @@ class WebTool:
         while not ap.active():
             pass
         self.ap = ap
-        self.say("http://        " + str(self.ap.ifconfig()[0]))
 
     def reset_oled(self):
         """Blank the optionally attached oled screen"""
@@ -93,7 +92,7 @@ class WebTool:
             self.oled.show()
         print("printing \"" + str(msg) + "\" to oled")
 
-    def wlan_is_connected(self): # should be a @property but it wasn't working as on
+    def wlan_is_connected(self): # should be a @property but it wasn"t working as on
         """Return if the device is connceted to WLAN"""
         try:
             return self.sta.isconnected()
@@ -105,14 +104,14 @@ class WebTool:
         with open(self.config_file, "r") as config_file:
             config_data = json.load(config_file)
         return config_data
+
     def connect_to_wlan(self, ssid=None, passwd=None):
         """Attempt to connect to the given ssid with the given password, defaults to config"""
         if ssid and passwd:
-            print('attempting to connect from given ssid(' + ssid + ") and passwd (" + passwd + ")")
+            print("attempting to connect from given ssid(" + ssid + ") and passwd (" + passwd + ")")
             self.sta.connect(str(ssid), str(passwd))
-            self.say("connecting to  " + str(ssid))
         else:
-            with open(self.config_file, 'r') as config_file:
+            with open(self.config_file, "r") as config_file:
                 config_data = json.load(config_file)
                 if "ssid" in config_data and "passwd" in config_data:
                     self.sta.connect(str(config_data["ssid"]), str(config_data["passwd"]))
@@ -123,7 +122,7 @@ class WebTool:
             pass
         if self.sta.isconnected():
             return self.sta.ifconfig()[0]
-        print('failed to connect')
+        print("failed to connect")
         return 0
     def write_config(self, data_to_write):
         """Updates the config file with key-values given in data_to_write"""
@@ -159,12 +158,12 @@ class WebTool:
         """
         Takes an HTTP request, returns requested dir and a dict of parameters
         """
-        if request == b'':
+        if request == b"":
             return ["", {}]
         wanted = re.search(r"GET /(.*?)\ HTTP", request).group(1).strip()
-        wanted = str(wanted, 'utf-8').replace("""%3a""", ":").replace("""%2f""", "/")
-        wanted = str(wanted, 'utf-8').replace("""%3A""", ":").replace("""%2F""", "/")
-        # I guess micropytthon doens't have case insensitive subtitutions
+        wanted = str(wanted, "utf-8").replace("""%3a""", ":").replace("""%2f""", "/")
+        wanted = str(wanted, "utf-8").replace("""%3A""", ":").replace("""%2F""", "/")
+        # I guess micropytthon doens"t have case insensitive subtitutions
         params = {}
         print("wanted =" + str(wanted))
         if "?" not in wanted:
@@ -175,17 +174,17 @@ class WebTool:
         for i in range(len(wanted[1])):
             tmp = wanted[1][i].split("=")
             # if not "http://" in tmp[1] and not "https://" in tmp[1] and wanted[0] == "host":
-            # # maybe this isn't neccesary
+            # # maybe this isn"t neccesary
             #     tmp[1] = "http://" + tmp[1]
             params[tmp[0]] = tmp[1]
         return [wanted[0], params]
     @staticmethod
     def send_page(conn, page):
-        """Sends an HTTP response to conn containing page as it's content"""
+        """Sends an HTTP response to conn containing page as it"s content"""
         try:
-            conn.send('HTTP/1.1 200 OK\n')
-            conn.send('Content-Type: text/html\n')
-            conn.send('Connection: close\n\n')
+            conn.send("HTTP/1.1 200 OK\n")
+            conn.send("Content-Type: text/html\n")
+            conn.send("Connection: close\n\n")
             conn.sendall(page)
             conn.close()
             time.sleep(1)

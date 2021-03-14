@@ -27,7 +27,6 @@ class SensorConfig(WebTool):
         self.username = 0
         self.password = 0
         self.sensorname = 0
-        print('setup init done')
     def update_from_config(self):
         """Update progress (host, sensor name, login entered) from config file"""
         with open(self.config_file, "r") as config_file:
@@ -42,6 +41,7 @@ class SensorConfig(WebTool):
         """Update config file from instance variables"""
         with open(self.config_file, "r+") as config_file:
             config_data = json.load(config_file)
+            tmp = config_data
             if self.host:
                 config_data["host"] = self.host
             if self.username:
@@ -51,21 +51,18 @@ class SensorConfig(WebTool):
                 config_data["sensorname"] = self.sensorname
             config_file.seek(0) # maybe unnecessary
             json.dump(config_data, config_file)
-        super().say("config updated!")
+        if tmp != config_data:
+            super().say("config updated!")
 
 
     @staticmethod
     def check_host_up(host):
         """Use the '/test' endpoint to check if the give host is up, returns the HTTP response"""
-        # try:
         resp = requests.get(str(host + "/test")).text
         if resp == "OK":
             return "OK"
         return str(resp)
-        # except Exception as e: # TODO make more specific
-        #     print('exception in checking host')
-        #     print(e)
-            # return e
+
     def name_sensor(self, desired_sensor_name):
         """
         Attempts to register a sensor with the given name at the host
@@ -110,23 +107,26 @@ class SensorConfig(WebTool):
                     page_to_return = pages.name_sensor(retry=False, sensnamed=self.sensorname, hostentered=self.host)
             else:
                 page_to_return = pages.name_sensor(retry=False, sensnamed=self.sensorname, hostentered=self.host)
+        # elif wanted_dir == "startsampling":
+        # TODO write sample lock handler
+
         self.update_config()
         if page_to_return:
             return page_to_return
         return pages.setup_home_page(host=self.host, uname=self.username, sname=self.sensorname)
     def run(self):
         """Handler user configuration through HTML pages"""
-        print('starting main loop')
+        print('starting config loop')
         print(self.sta.ifconfig())
         while True:
             super().say("http://" + str(self.sta.ifconfig()[0]))
             self.update_from_config()
             if self.host and self.sensorname:
-                if self.lock.locked():
-                    self.lock.release()
+                if self.config_lock.locked():
+                    self.config_lock.release()
             conn, wanted_dir, params = super().recieve_request()
-            while not self.lock.acquire():
+            while not self.config_lock.acquire():
                 machine.idle()
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))
-            self.lock.release()
+            self.config_lock.release()

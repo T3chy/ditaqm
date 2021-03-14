@@ -14,8 +14,10 @@ class SetupAp(WebTool):
     def run(self, sock):
         """Serve HTTP with connection options, try to connect to WLAN, repeat"""
         super().init_sock(sock)
+        super().say("scanning SSIDs...")
         ssid_html = super().get_html_ssid_list()
         super().setup_ap()
+        self.say("http://        " + str(self.ap.ifconfig()[0]))
         conn_succ = False
         while True:
             if super().wlan_is_connected():
@@ -24,6 +26,7 @@ class SetupAp(WebTool):
             if "ssid" in params:
                 if "pass" not in params: # might not be necessary
                     params["pass"] = ""
+                self.say("connecting to  " + str(params["ssid"]))
                 conn_succ = super().connect_to_wlan(ssid=params["ssid"], passwd=params["pass"])
                 if conn_succ:
                     to_send = pages.ssid_connect_success()

@@ -5,8 +5,8 @@
 This is currently in development, but you can
 
 
-[Read the abstract!](../../ABSTRACT.md)
+-[Read the abstract!](../../ABSTRACT.pdf)
 
-[Check out the pcb / enclosure designs!](../../boards/esp32/hardware)
+-[Check out the pcb / enclosure designs!](../../boards/esp32/hardware)
 
-Take a look at the [firmware source code!](../../boards/esp32/firmware)
+-Take a look at the [firmware source code!](../../boards/esp32/firmware)

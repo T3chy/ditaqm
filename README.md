@@ -10,4 +10,5 @@ Below are the links to all of the documents you need to get your very own distri
 - [Configure and host MySql database to store your data!](docs/db.md)
 
 ## Sensor Setup
-- [Raspberry Pi](boards/raspi/)
+- [ESP32](docs/esp32/) (the cool one)
+- [Raspberry Pi](docs/raspi/)

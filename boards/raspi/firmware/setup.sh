@@ -15,7 +15,7 @@ pullDeps(){ #TODO try to not run this after reboot
 
 	# try to not repull deps
 	[ -d diyaqi/boards/raspi ] || git clone https://github.com/t3chy/diyaqi
-	cd diyaqi/boards/raspi || error "can't enter source directory. Git clone probably failed"
+	cd diyaqi/boards/raspi/firmware || error "can't enter source directory. Git clone probably failed"
 	if ! [ -f ran ]; then {
 		touch ran
 

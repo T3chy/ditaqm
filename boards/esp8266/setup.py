@@ -110,7 +110,7 @@ def main_page():
            <center>
                <ol>
                    <li> Enter your host (website): """ + hosttext + """ </li>
-                   <li> Login / Register an Account: : """ + logintext + """ </li>
+                   <li> (optional) Login / Register an Account: : """ + logintext + """ </li>
                    <li> Name your sensor: """ + nametext + """ </li>
                </ol>
            </center>
@@ -148,13 +148,54 @@ def host_page(retry=False):
                """ + ("""<h2> It appears that host doesn't exist :( please enter something like "https://albanylovestheair.com"</h2>"""if retry else "") + """
                <center><h2>Please enter your host below:</h2></center>
                <form>
-                   <input id='host' type='text' name="host" placeholder="https://yourwebsite.com">
+                   <input id='host' type='url' name="host" placeholder="https://yourwebsite.com">
                    <input type="submit" value="Submit">
                </form><br><br>
                <a href="/"> return to home </a> </center>
                </body>
             </html>"""
     return html_page
+def sensname_page(retry=False):
+    pass
+    if sensnamed:
+        html_page = """<!DOCTYPE HTML>
+            <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body>
+               <center><h2>Welcome to your Air Quality Cluster Setup!</h2></center>
+               <center><h2>You have already named your sensor!!
+               <form>
+                   <input type="hidden" name="reset host" value="1">
+                   <input type="button" value=Reset Host>?
+               </form><br><br>
+               <a href="/"> return to home </a>
+               </h2></center>
+            </body>
+            </html>
+        """
+
+    else:
+        html_page = """<!DOCTYPE HTML>
+            <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body>
+               <center><h2>Welcome to your Air Quality Cluster Setup!</h2>
+               """ + ("""<h2> It appears that your sensor name is not unique :( please enter something unique like [yourname]house</h2>"""if retry else "") + """
+               <center><h2>Please enter your chosen sensor name below:</h2></center>
+               <form>
+                   <input id='sensname' type='text' name="sensname" placeholder="ElamHouse">
+                   <input type="submit" value="Submit">
+               </form><br><br>
+               <a href="/"> return to home </a> </center>
+               </body>
+            </html>"""
+    return html_page
+
+
 
 def login_page():
     if hostentered:
@@ -269,9 +310,10 @@ while True:
                 print(args['host'])
                 try:
                     resp = requests.get(str(args["host"] + "/test")).text
-                except:
+                except Exception as e:
+                    print(e)
+                    print(resp)
                     resp = 0
-                print(resp)
                 if resp == "OK":
                     hostentered = True
                     HOST = args["host"]
@@ -286,6 +328,38 @@ while True:
                     response = host_page(retry=True)
             else:
                 response = host_page(retry=False)
+        elif wanted == "namesens":
+            if "sensname" in args:
+                print(args['sensname'])
+                try:
+                    # resp = requests.get(str(HOST + "/api/checkUnique")).text
+                    uname = json.dumps({"name":args['sensname']})
+                    resp = requests.post(str(HOST + "/checkUnique"), data=uname).text # TODO OUTDATED USING ON LIVE SITE FOR TESTING
+                except Exception as e:
+                    print(e)
+                    print(resp)
+                    resp = 0
+                if resp == "OK":
+                    hostentered = sensnamed
+                    SNAME = args["sensname"]
+                    response = main_page()
+                try:
+                    # resp = requests.get(str(HOST + "/api/regSens")).text
+                    uname = json.dumps({"name":args['sensname']})
+                    resp = requests.post(str(HOST + "/regSens"), data=uname).text # TODO OUTDATED USING ON LIVE SITE FOR TESTING
+                except Exception as e:
+                    print(e)
+                    print(resp)
+                    with open('config.json', 'r+') as f:
+                        content = json.load(f)
+                        content["sensname"] = args["sensname"]
+                        f.seek(0)
+                        json.dump(content,f)
+                        print("sensor name added to configuration!")
+                else:
+                    response = sensname_page(retry=True)
+            else:
+                response = sensname_page(retry=False)
 
         else:
             response = main_page()

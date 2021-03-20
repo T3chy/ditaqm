@@ -2,7 +2,7 @@
 <export version="D">
   <design>
     <source>/home/elamd/projects/aqic/diyaqi/boards/esp32/hardware/pcb/smbpcb.kicad_sch</source>
-    <date>Tue 16 Mar 2021 09:04:03 AM PDT</date>
+    <date>Tue 16 Mar 2021 10:12:10 AM PDT</date>
     <tool>Eeschema (5.99.0-8928-gc255dede17)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -702,8 +702,15 @@
     </comp>
     <comp ref="R11">
       <value>1k5</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <datasheet>~</datasheet>
+      <fields>
+        <field name="LCSC">C203762</field>
+        <field name="Mouser">CR0805-FX-1501ELF</field>
+      </fields>
       <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="LCSC" value="C203762"/>
+      <property name="Mouser" value="CR0805-FX-1501ELF"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
@@ -711,15 +718,22 @@
     </comp>
     <comp ref="R12">
       <value>1k5</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <datasheet>~</datasheet>
+      <fields>
+        <field name="LCSC">C203762</field>
+        <field name="Mouser">CR0805-FX-1501ELF</field>
+      </fields>
       <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="LCSC" value="C203762"/>
+      <property name="Mouser" value="CR0805-FX-1501ELF"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamp>3c9fc1fe-2257-4f43-ada5-ed1c4e4f94f3</tstamp>
     </comp>
     <comp ref="R17">
-      <value>4.7k</value>
+      <value>4k7</value>
       <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <datasheet>~</datasheet>
       <fields>
@@ -735,7 +749,7 @@
       <tstamp>48ecb9b2-9c9c-42ac-9e9f-cab25ac716a7</tstamp>
     </comp>
     <comp ref="R18">
-      <value>4.7k</value>
+      <value>4k7</value>
       <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <datasheet>~</datasheet>
       <fields>
@@ -863,7 +877,7 @@
       <tstamp>e60d0db5-fcdc-4aed-ab8a-b187b8daf687</tstamp>
     </comp>
     <comp ref="R27">
-      <value>5.1k</value>
+      <value>5k1</value>
       <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <datasheet>~</datasheet>
       <fields>

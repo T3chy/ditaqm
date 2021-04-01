@@ -50,3 +50,10 @@ This will be a guide for ordering the components on LCSC, it is probably similar
 3. Leave all options as default, this will ensure the fastest manfucaturing time and lowest cost
 
 4. Save to cart and checkout!
+
+**Note that JLCPCB will usually take around a week to arrive (with DHL shipping) while LCSC may take up to 2 and a half, depending on which shipping you chose and how long it takes to gather your components in the warehouse**
+
+### Step 2: Assembling
+I'll probably make a video on this just open the kicad and follow that or I'll make a key for component designators or smth
+
+**IMPORTANT if you aren't getting any power from the Micro-USB/5V source, check to see if you installed diode D1 backwards! This has happened a few times to me and I only realized that it was the problem when it started heating up.

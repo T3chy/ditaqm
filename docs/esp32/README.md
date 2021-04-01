@@ -2,6 +2,16 @@
 # Embedded, low cost, ESP32 Air Quality Cluster
 ## What more could you ask for?
 
+## Note
+
+This is currently in development, but you can
+
+
+-[Read the abstract!](../../ABSTRACT.pdf)
+
+-Check out the [pcb](../../boards/esp32/hardware/pcb/) and [enclosure](../../boards/esp32/hardware) designs!
+
+-Take a look at the [firmware source code!](../../boards/esp32/firmware)
 
 ## Welcome!
 Below are the steps to set up your very own ESP32-based DIYAQI sensor cluster board!
@@ -40,26 +50,3 @@ This will be a guide for ordering the components on LCSC, it is probably similar
 3. Leave all options as default, this will ensure the fastest manfucaturing time and lowest cost
 
 4. Save to cart and checkout!
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Table of Contents
-
-This is currently in development, but you can
-
-
--[Read the abstract!](../../ABSTRACT.pdf)
-
--Check out the [pcb](../../boards/esp32/hardware/pcb/) and [enclosure](../../boards/esp32/hardware) designs!
-
--Take a look at the [firmware source code!](../../boards/esp32/firmware)

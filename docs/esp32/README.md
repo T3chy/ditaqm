@@ -25,7 +25,23 @@ This will be a guide for ordering the components on LCSC, it is probably similar
 
 2. Download the [BOM](../../boards/esp32/hardware/pcb/bom.csv) and upload it to the site
 
-3.
+3. Once you upload the BOM, you should see a spreadsheet appear. All you need to do is set the "quantity" column to "Quantity" and the "LCSC" column to "LCSC Part Number", as seen in the picture below  ![bom tool](media/bom_tool.png "Finalizing the BOM")
+
+5. Click next, and you will be shown a list of the items required for one unit. Keep in mind that many of the passive components (resistors, capacitors) require a minimum order quanity of between 20 and 100 units, but they cost fractions of cents so don't worry too much about it. Also consider that the BME680 and PMS7003 sensors are included in the LCSC bom, and are by far the most significiant contributors to price. If you laready have these sensors, take them off the list with the trashcan button and that should take your price down quite a bit. Next to the "Add to cart" button there is a multiplier, use that if you are ordering parts for multiple sensor clusters. Keep in mind that if you put, say, 100 qty for a component and multiply that by 4 orders, you will have 400 units in your cart, which is way over the order quantity. Keep that in mind when selecting component qunatities.
+
+7. Once you're ready, you can add the components to cart and check out!
+
+
+#### Ordering the PCBs
+1. Head over to [JLCPCB](https://jlcpcb.com) and click on the big blue "QUOTE NOW" button
+
+2. Download the [PCB Design Files](../../boards/esp32/hardware/pcb/src.zip), click "Add gerber file" and upload the src.zip you just downloaded.
+
+3. Leave all options as default, this will ensure the fastest manfucaturing time and lowest cost
+
+4. Save to cart and checkout!
+
+
 
 
 

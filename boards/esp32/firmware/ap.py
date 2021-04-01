@@ -26,6 +26,7 @@ class SetupAp(WebTool):
             if "ssid" in params:
                 if "pass" not in params: # might not be necessary
                     params["pass"] = ""
+                params["ssid"] = params["ssid"].strip("%27")
                 self.say("connecting to  " + str(params["ssid"]))
                 conn_succ = super().connect_to_wlan(ssid=params["ssid"], passwd=params["pass"])
                 if conn_succ:

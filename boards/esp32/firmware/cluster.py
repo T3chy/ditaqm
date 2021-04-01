@@ -40,7 +40,7 @@ class Cluster:
 
         # attempt to take a reading from the MH-Z19B sensor
         self.sensors["mhz19b"] = mhz19b.MHZ19B()
-        if self.sensors["mhz19b"].read() == 0: # read() returns 0 on failure
+        if self.sensors["mhz19b"].read()["co2"] == 0: # read() returns 0 on failure
             self.sensors.pop("mhz19b") # not connected
 
         #attempt to initalize pms7003 sensor on uart bus 1
@@ -68,10 +68,12 @@ class Cluster:
                 pass # TODO make this useful
             full_sample.update(tmp)
         return full_sample
-    def send_sample(self):
+    def send_sample(self, host=None):
         """
         Sends a POST request to the provided host with all available data
         """
+        if not host:
+            host = self.config["host"]
         body = self.take_measurement()
         body["sensorname"] = self.config["sensorname"]
         if "username" in self.config:
@@ -79,7 +81,7 @@ class Cluster:
         if "password" in self.config:
             body["password"] = self.config["password"]
         try:
-            resp = requests.post(str(self.config["host"] + "/api/in"), headers=POST_HEADERS, data=body).json()
+            resp = requests.post(str(host + "/api/in"), headers=POST_HEADERS, data=body).json()
         except Exception as e:
             print("error POSTing data sample!")
             print(e)

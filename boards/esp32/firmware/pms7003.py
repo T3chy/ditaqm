@@ -39,7 +39,7 @@ class Pms7003:
         if uart:
             self.uart = machine.UART(uart, baudrate=9600, bits=8, parity=None, stop=1)
         else:
-            self.uart = uart = machine.UART(2, baudrate=9600, bits=8, parity=None, stop=1, tx=16, rx=17, rts=-1, cts=-1, txbuf=256, rxbuf=256, timeout=500)
+            self.uart = uart = machine.UART(2, baudrate=9600, bits=8, parity=None, stop=1, tx=17, rx=16, rts=-1, cts=-1, txbuf=256, rxbuf=256, timeout=500)
     def __repr__(self):
         return "Pms7003({})".format(self.uart)
 

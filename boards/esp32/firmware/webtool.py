@@ -62,6 +62,8 @@ class WebTool:
         """Returns an HTML string containing dropdown menu with connectable SSIDs"""
         ssid_list = "<select id=\"ssid\" name=\"ssid\">"
         for ssid in self.scan_ssids():
+            ssid = ssid.decode("utf-8")
+            print('ssid is ' + str(ssid))
             ssid = str(ssid).strip("b").strip("\"").strip("\"")
             ssid_list += "<option value= \"" + ssid + "\">" + ssid + "</option>"
         ssid_list +=  "</select>"
@@ -108,7 +110,7 @@ class WebTool:
     def connect_to_wlan(self, ssid=None, passwd=None):
         """Attempt to connect to the given ssid with the given password, defaults to config"""
         if ssid and passwd:
-            print("attempting to connect from given ssid(" + ssid + ") and passwd (" + passwd + ")")
+            print("attempting to connect from given ssid(" + str(ssid) + ") and passwd (" + str(passwd) + ")")
             self.sta.connect(str(ssid), str(passwd))
         else:
             with open(self.config_file, "r") as config_file:
@@ -117,12 +119,17 @@ class WebTool:
                     self.sta.connect(str(config_data["ssid"]), str(config_data["passwd"]))
                 else:
                     return 0
-            self.say("connecting to " + str(config_data["ssid"]))
-        while self.sta.status() == network.STAT_CONNECTING:
-            pass
+            self.say("connecting to  " + str(config_data["ssid"]))
+
+        for _ in range(60):
+            if self.sta.status() != network.STAT_CONNECTING:
+                # break out on failure or success
+                break
+            time.sleep(1)
         if self.sta.isconnected():
             return self.sta.ifconfig()[0]
         print("failed to connect")
+        print(str(self.sta.status()))
         return 0
     def write_config(self, data_to_write):
         """Updates the config file with key-values given in data_to_write"""

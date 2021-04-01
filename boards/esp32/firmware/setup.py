@@ -22,7 +22,7 @@ POST_HEADERS = {'content-type': 'application/json'}
 class SensorConfig(WebTool):
     """Basic sensor configuration- host to push to, sensor name, and optional user login"""
     def __init__(self, sock, lock, config_file="config.json"):
-        super().__init__(sock=sock, lock=lock, config_file=config_file)
+        super().__init__(sock=sock, config_file=config_file)
         self.host = 0
         self.username = 0
         self.password = 0

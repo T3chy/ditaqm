@@ -3,7 +3,7 @@ Ref,Val,Package,PosX,PosY,Rot,Side
 "","","",56.855000,-87.700000,0.000000,top
 "5V_IN1","Conn_01x02_Female","PinHeader_1x02_P2.54mm_Vertical",59.960000,-35.540000,0.000000,top
 "AUX_CONN1","Conn_01x04_Female","PinHeader_1x04_P2.54mm_Vertical",104.250000,-70.450000,0.000000,top
-"AUX_CONN2","Conn_01x04_Female","PinHeader_1x04_P2.54mm_Vertical",104.250000,-89.450000,180.000000,top
+"AUX_CONN2","Conn_01x04_Female","PinHeader_1x04_P2.54mm_Vertical",100.550000,-89.100000,180.000000,top
 "AUX_CONN3","Conn_01x04_Female","PinHeader_1x04_P2.54mm_Vertical",113.160000,-89.315000,180.000000,top
 "AUX_CONN4","Conn_01x04_Female","PinHeader_1x04_P2.54mm_Vertical",122.460000,-89.315000,180.000000,top
 "BT1","Battery_Cell","JST_EH_S2B-EH_1x02_P2.50mm_Horizontal",73.305000,-29.315000,0.000000,top
@@ -36,7 +36,6 @@ Ref,Val,Package,PosX,PosY,Rot,Side
 "MOUNT4","MountingHole_3.2mm_M3_ISO7380_Pad","MountingHole_3.2mm_M3_ISO7380_Pad",132.755000,-87.900000,0.000000,top
 "Q1","SUD08P06-155L","TO-252-2",76.227000,-43.758200,0.000000,top
 "R1","2k","C_0805_2012Metric",62.260000,-42.115000,0.000000,top
-"R2","10k","C_0805_2012Metric",110.960000,-39.715000,180.000000,top
 "R3","10k","C_0805_2012Metric",107.060000,-42.815000,0.000000,top
 "R4","10k","C_0805_2012Metric",65.860000,-42.115000,180.000000,top
 "R5","10k","C_0805_2012Metric",106.960000,-39.765000,0.000000,top

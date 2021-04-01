@@ -2,14 +2,14 @@
 <export version="D">
   <design>
     <source>/home/elamd/projects/aqic/diyaqi/boards/esp32/hardware/pcb/smbpcb.kicad_sch</source>
-    <date>Tue 16 Mar 2021 10:12:10 AM PDT</date>
+    <date>Sun 21 Mar 2021 11:43:32 AM PDT</date>
     <tool>Eeschema (5.99.0-8928-gc255dede17)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>DiyAqi Esp32 Smb pcb</title>
         <company>Elam Day-Friedland</company>
-        <rev>v0.0.5</rev>
-        <date>2021-02-07</date>
+        <rev>v1.0.2</rev>
+        <date>2021-03-20</date>
         <source>smbpcb.kicad_sch</source>
         <comment number="1" value=""/>
         <comment number="2" value=""/>
@@ -46,11 +46,13 @@
       <datasheet>~</datasheet>
       <fields>
         <field name="LCSC">C124413</field>
-        <field name="mfr_part_num">C124413</field>
+        <field name="Mouser"> 571-9-146278-0 </field>
+        <field name="notes">MOUSER MALE 40 pins per unit</field>
       </fields>
       <libsource lib="Connector" part="Conn_01x04_Female" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="LCSC" value="C124413"/>
-      <property name="mfr_part_num" value="C124413"/>
+      <property name="Mouser" value=" 571-9-146278-0 "/>
+      <property name="notes" value="MOUSER MALE 40 pins per unit"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
@@ -62,11 +64,13 @@
       <datasheet>~</datasheet>
       <fields>
         <field name="LCSC">C124413</field>
-        <field name="mfr_part_num">C124413</field>
+        <field name="Mouser"> 571-9-146278-0 </field>
+        <field name="notes">MOUSER MALE 40 pins per unit</field>
       </fields>
       <libsource lib="Connector" part="Conn_01x04_Female" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="LCSC" value="C124413"/>
-      <property name="mfr_part_num" value="C124413"/>
+      <property name="Mouser" value=" 571-9-146278-0 "/>
+      <property name="notes" value="MOUSER MALE 40 pins per unit"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
@@ -78,11 +82,13 @@
       <datasheet>~</datasheet>
       <fields>
         <field name="LCSC">C124413</field>
-        <field name="mfr_part_num">C124413</field>
+        <field name="Mouser"> 571-9-146278-0 </field>
+        <field name="notes">MOUSER MALE 40 pins per unit</field>
       </fields>
       <libsource lib="Connector" part="Conn_01x04_Female" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="LCSC" value="C124413"/>
-      <property name="mfr_part_num" value="C124413"/>
+      <property name="Mouser" value=" 571-9-146278-0 "/>
+      <property name="notes" value="MOUSER MALE 40 pins per unit"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
@@ -94,11 +100,13 @@
       <datasheet>~</datasheet>
       <fields>
         <field name="LCSC">C124413</field>
-        <field name="mfr_part_num">C124413</field>
+        <field name="Mouser"> 571-9-146278-0 </field>
+        <field name="notes">MOUSER MALE 40 pins per unit</field>
       </fields>
       <libsource lib="Connector" part="Conn_01x04_Female" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="LCSC" value="C124413"/>
-      <property name="mfr_part_num" value="C124413"/>
+      <property name="Mouser" value=" 571-9-146278-0 "/>
+      <property name="notes" value="MOUSER MALE 40 pins per unit"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
@@ -466,11 +474,13 @@
       <datasheet>~</datasheet>
       <fields>
         <field name="LCSC">C124375</field>
-        <field name="mfr_part_num">C124375</field>
+        <field name="Mouser">801-87-040-10-001101</field>
+        <field name="notes">MOUSER FEMALE 40 pins per unit</field>
       </fields>
       <libsource lib="Connector" part="Conn_01x02_Female" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
       <property name="LCSC" value="C124375"/>
-      <property name="mfr_part_num" value="C124375"/>
+      <property name="Mouser" value="801-87-040-10-001101"/>
+      <property name="notes" value="MOUSER FEMALE 40 pins per unit"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="smbpcb.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>

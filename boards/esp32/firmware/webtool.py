@@ -1,19 +1,20 @@
 """
 Parent class used to assist in wireless setup
 """
+import _thread
 import json
 import time
 import re
-import os
 import ssd1306
 import usocket as socket
 import network
 from machine import Pin, SoftI2C
+import status
 
 
 class WebTool:
     """said parent class"""
-    def __init__(self, config_lock=None, sample_lock= None, sock=None, config_file="config.json"):
+    def __init__(self, config_lock=None, sample_lock= None, sock=None, config_file="config.json", np=False):
         sta = network.WLAN(network.STA_IF)
         if not sta.active():
             sta.active(True)
@@ -26,6 +27,8 @@ class WebTool:
         self.config_file = config_file
         self.config_lock = config_lock
         self.sample_lock = sample_lock
+        np = True
+        self.status = status.Status(np=np)
         if sock:
             self.init_sock(sock)
         else:
@@ -63,7 +66,6 @@ class WebTool:
         ssid_list = "<select id=\"ssid\" name=\"ssid\">"
         for ssid in self.scan_ssids():
             ssid = ssid.decode("utf-8")
-            print('ssid is ' + str(ssid))
             ssid = str(ssid).strip("b").strip("\"").strip("\"")
             ssid_list += "<option value= \"" + ssid + "\">" + ssid + "</option>"
         ssid_list +=  "</select>"
@@ -120,12 +122,17 @@ class WebTool:
                 else:
                     return 0
             self.say("connecting to  " + str(config_data["ssid"]))
-
+        print('starting leds')
+        self.status.inprogress.acquire()
+        _thread.start_new_thread(self.status.connecting_seq, ())
+        print("leds time")
         for _ in range(60):
             if self.sta.status() != network.STAT_CONNECTING:
                 # break out on failure or success
                 break
             time.sleep(1)
+        print('canceling led coroutine')
+        self.status.inprogress.release()
         if self.sta.isconnected():
             return self.sta.ifconfig()[0]
         print("failed to connect")

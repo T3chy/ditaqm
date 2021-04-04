@@ -12,6 +12,7 @@ from setup import SensorConfig
 import machine
 import cluster
 import sys
+# TODO use status leds for thigns other than wifi lol (maybe green / red for pollutant levels?)
 def sample(clust, lock, interval=30):
     """
     Send periodic measurements from connected sensors, exits when the provided lock is acquired
@@ -31,8 +32,8 @@ def sample(clust, lock, interval=30):
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 setup = SetupAp()
+
 setup.say('bruh')
-sys.exit(0)
 
 if not setup.wlan_is_connected():
     # launch setup AP and get valid wifi creds, then reboot
@@ -63,6 +64,4 @@ sensor_cluster = cluster.Cluster(setup.config)
 config_lock.release()
 
 print('sensor time')
-# _thread.start_new_thread(sample, (sensor_cluster, sample_lock))
-# if input("kill sampling? [Y/n] \n") != "n":
-#     sample_lock.acquire()
+_thread.start_new_thread(sample, (sample_lock))

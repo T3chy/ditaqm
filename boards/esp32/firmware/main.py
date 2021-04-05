@@ -23,7 +23,7 @@ def sample(clust, lock, interval=30):
         pass
     lock.release()
     while True:
-        clust.send_sample()
+        print(clust.send_sample())
         time.sleep(interval)
         if lock.locked():
             break
@@ -61,7 +61,6 @@ setup.reset_oled()
 
 # init sensors
 sensor_cluster = cluster.Cluster(setup.config)
-config_lock.release()
 
 print('sensor time')
-_thread.start_new_thread(sample, (sample_lock))
+_thread.start_new_thread(sample, (sensor_cluster, sample_lock))

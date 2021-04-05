@@ -22,7 +22,7 @@ POST_HEADERS = {'content-type': 'application/json'}
 class SensorConfig(WebTool):
     """Basic sensor configuration- host to push to, sensor name, and optional user login"""
     def __init__(self, sock, lock, config_file="config.json"):
-        super().__init__(sock=sock, config_file=config_file)
+        super().__init__(sock=sock, config_lock=lock, config_file=config_file)
         self.host = 0
         self.username = 0
         self.password = 0
@@ -59,6 +59,7 @@ class SensorConfig(WebTool):
     def check_host_up(host):
         """Use the '/test' endpoint to check if the give host is up, returns the HTTP response"""
         resp = requests.get(str(host + "/test")).text
+        print('resp is ' + str(resp))
         if resp == "OK":
             return "OK"
         return str(resp)
@@ -85,7 +86,7 @@ class SensorConfig(WebTool):
                 print("host in params!")
                 if self.check_host_up(params['host']) == "OK":
                     print('host is up')
-                    self.host = params['host']
+                    self.host = params['host'].strip('/') # incase they say like http://this.com/
                 else:
                     page_to_return = pages.host_page(retry=True, hostentered=self.host)
             else:
@@ -125,8 +126,7 @@ class SensorConfig(WebTool):
                 if self.config_lock.locked():
                     self.config_lock.release()
             conn, wanted_dir, params = super().recieve_request()
-            while not self.config_lock.acquire():
-                machine.idle()
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))
-            self.config_lock.release()
+            if self.host and self.sensorname:
+                self.config_lock.release()

@@ -32,17 +32,16 @@ class Status:
         if len(val) == 1:
             for np_idx in range(self.n_neopixels):
                 self.np[np_idx] = val[0]
-        for np_idx in range(self.n_neopixels):
-            self.np[np_idx] = val[np_idx]
+        else:
+            for np_idx in range(self.n_neopixels):
+                self.np[np_idx] = val[np_idx]
         self.np.write()
     def connecting_seq(self):
         """
         blink the blue led and wave the neopixel stick, indicates connecting to wifi
         """
-        print('connecting seq called')
         tick = True
         while self.inprogress.locked():
-            print('led coroutine time')
             self.change_onboard(blue=True)
             self.set_all_neopixels()
             if tick:
@@ -63,6 +62,6 @@ class Status:
                     time.sleep(.1)
                 tick= True
         self.set_all_neopixels()
-        self.set_all_neopixels(val=(0,20,0,0))
+        self.set_all_neopixels(val=[(0,20,0,0)])
         time.sleep(.25)
         self.set_all_neopixels()

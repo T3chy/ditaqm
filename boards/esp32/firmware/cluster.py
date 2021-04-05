@@ -9,6 +9,7 @@ import pms7003
 import mics6814
 import mhz19b
 import urequests as requests
+import ujson
 POST_HEADERS = {"content-type": "application/json"}
 class Cluster:
     """
@@ -81,7 +82,7 @@ class Cluster:
         if "password" in self.config:
             body["password"] = self.config["password"]
         try:
-            resp = requests.post(str(host + "/api/in"), headers=POST_HEADERS, data=body).json()
+            resp = requests.post(str(host + "/api/in"), headers=POST_HEADERS, data=ujson.dumps(body)).json()
         except Exception as e:
             print("error POSTing data sample!")
             print(e)

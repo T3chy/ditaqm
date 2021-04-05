@@ -228,4 +228,4 @@ class BME680_I2C(Adafruit_BME680):
       self._i2c.writeto_mem(self._address, register, bytearray([value & 0xFF]))
       register += 1
   def read(self):
-      return {"temperature":self.temperature, "pressure":self.pressure, "humidity":self.humidity, "gas":self.gas}
+      return {"temperature":self.temperature, "pressure":self.pressure, "humidity":self.humidity, "gas":self.gas, "altitude":self.altitude}

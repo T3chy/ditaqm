@@ -128,5 +128,5 @@ class SensorConfig(WebTool):
             conn, wanted_dir, params = super().recieve_request()
             print("wanted dir is " +  str(wanted_dir))
             super().send_page(conn, self.route_request(wanted_dir, params))
-            if self.host and self.sensorname:
+            if self.host and self.sensorname and not self.config_lock.locked():
                 self.config_lock.release()

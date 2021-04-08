@@ -3,6 +3,7 @@ import time
 import _thread
 
 
+
 class Status:
     """
     Status LED stuff, uses the 2 onboard LEDs and a neopixel if it's there
@@ -28,7 +29,12 @@ class Status:
         else:
             self.blue.value(0)
     def set_all_neopixels(self, val=[(0,0,0,0)]):
-        """Blank all attached neopixels"""
+        """
+        Set all attached neopixels, defaults to blanking them. If one RGBY array is passed,
+        all attached NeoPixels will be set to it
+        """
+        if len(val) == 0:
+            return
         if len(val) == 1:
             for np_idx in range(self.n_neopixels):
                 self.np[np_idx] = val[0]

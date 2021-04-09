@@ -4,7 +4,7 @@
 Below are the links to all of the documents you need to get your very own distributed air quality sensor mesh set up!
 
 # Paper Abstract
-[Check it out! (and admit me pls)](ABSTRACT.pdf)
+[Check it out!](ABSTRACT.pdf)
 
 ## Sensor Setup
 - [ESP32](docs/esp32/) (the cool one)

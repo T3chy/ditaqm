@@ -56,4 +56,10 @@ This will be a guide for ordering the components on LCSC, it is probably similar
 ### Step 2: Assembling
 I'll probably make a video on this just open the kicad and follow that or I'll make a key for component designators or smth
 
-**IMPORTANT if you aren't getting any power from the Micro-USB/5V source, check to see if you installed diode D1 backwards! This has happened a few times to me and I only realized that it was the problem when it started heating up.
+**IMPORTANT if you aren't getting any power from the Micro-USB/5V source, check to see if you installed diode D1 backwards! This has happened a few times to me and I only realized that it was the problem when the diode started heating up and I wasn't getting any voltage through the LDO regulator while powered off of the battery.
+
+### Step 3: Flashing the Firmware
+If you want, you can use an [esp32-wroom flashing device]() to flash the ESP32 before you solder it in. If you choose to assemble the cluster fully before flashing the firmware, follow the instructions below.
+
+1. Download [esptool]((). This is the standard software package used to flash firmware to Espressif devices, including the ESP32 we are using.
+2. Since there is no onboard usb-serial IC on the board, you will need to use an external one. Once you have that device plugged in, wire the external device's RX to your cluster's TX and the device's TX to your cluster's RX. You will also need to connect the ground header on the flashing device to any ground (either marked GND or -, it doesn't matter which one you use) in order to allow voltage to flow. Once you have wired everything up, power the cluster through either a micro usb power supply or a battery, holding the IO0 button before, during, and a few seconds after powering the device. This puts it in 'firmware upload mode' and is the mode we need to be in to flash firmware.

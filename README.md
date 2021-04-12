@@ -1,4 +1,4 @@
-# Low Cost, Distributed, and Open Source Air Quality Sampling!
+# Do-it-Together Air Quality Measuring!
 
 ## Welcome!
 Below are the links to all of the documents you need to get your very own distributed air quality sensor mesh set up!

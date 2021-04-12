@@ -14,7 +14,7 @@ This is currently in development, but you can
 -Take a look at the [firmware source code!](../../boards/esp32/firmware)
 
 ## Welcome!
-Below are the steps to set up your very own ESP32-based DIYAQI sensor cluster board!
+Below are the steps to set up your very own ESP32-based DITAQM sensor cluster board!
 
 To get a cluster board up and running, you have two options:
 
